@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MS Widget Suite — License Dashboard</title>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #161a22;
+      --border:    #252b36;
+      --accent:    #f97316;
+      --accent2:   #fb923c;
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --green:     #22c55e;
+      --red:       #ef4444;
+      --radius:    10px;
+      --font:      'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 10;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-dot {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: #fff;
+    }
+    .logo-text { font-weight: 700; font-size: 17px; }
+    .logo-sub  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+    /* ── Login gate ────────────────────────────────────────────────── */
+    #login-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 80vh; gap: 24px;
+      text-align: center;
+    }
+    #login-screen h2 { font-size: 28px; font-weight: 700; }
+    #login-screen p  { color: var(--muted); font-size: 15px; }
+    #login-screen input {
+      width: 300px; padding: 12px 16px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); font-size: 16px; text-align: center;
+      letter-spacing: 3px;
+    }
+    #login-screen input:focus { outline: 2px solid var(--accent); }
+
+    /* ── App screen ────────────────────────────────────────────────── */
+    #app-screen { display: none; }
+
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .top-bar h1 { font-size: 24px; font-weight: 700; }
+
+    /* ── Buttons ───────────────────────────────────────────────────── */
+    .btn {
+      padding: 10px 20px; border-radius: var(--radius);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      border: none; transition: opacity .15s, transform .1s;
+    }
+    .btn:hover { opacity: .88; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary  { background: var(--accent);  color: #fff; }
+    .btn-danger   { background: var(--red);     color: #fff; }
+    .btn-ghost    {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-sm { padding: 6px 14px; font-size: 13px; }
+
+    /* ── Stats row ─────────────────────────────────────────────────── */
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 24px;
+    }
+    .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value { font-size: 32px; font-weight: 700; margin-top: 6px; }
+    .stat-card .value.green { color: var(--green); }
+    .stat-card .value.orange { color: var(--accent); }
+
+    /* ── Client table ──────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th {
+      background: #1e2330; color: var(--muted); font-size: 11px;
+      text-transform: uppercase; letter-spacing: .05em;
+      padding: 12px 20px; text-align: left; font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,.025); }
+    td { padding: 14px 20px; vertical-align: middle; }
+
+    /* ── Status badge ──────────────────────────────────────────────── */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+    }
+    .badge-on  { background: rgba(34,197,94,.15); color: var(--green); }
+    .badge-off { background: rgba(239,68,68,.12); color: var(--red);   }
+
+    /* ── Widget toggles ────────────────────────────────────────────── */
+    .widget-dots { display: flex; gap: 5px; flex-wrap: wrap; }
+    .wdot {
+      width: 10px; height: 10px; border-radius: 50%;
+      title: attr(data-widget);
+    }
+    .wdot-on  { background: var(--green); }
+    .wdot-off { background: var(--border); }
+
+    /* ── Modal ─────────────────────────────────────────────────────── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.7); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 32px; width: min(580px, 95vw);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+    .form-grid { display: grid; gap: 16px; }
+    .field label {
+      display: block; font-size: 12px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); font-size: 14px;
+    }
+    .field input:focus, .field select:focus {
+      outline: 2px solid var(--accent); border-color: transparent;
+    }
+
+    .widget-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-top: 4px;
+    }
+    .widget-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg);
+      font-size: 13px; cursor: pointer; transition: border-color .15s;
+    }
+    .widget-toggle:hover { border-color: var(--accent); }
+    .widget-toggle input { display: none; }
+    .toggle-slider {
+      width: 34px; height: 18px; border-radius: 20px; background: var(--border);
+      position: relative; transition: background .2s; flex-shrink: 0;
+    }
+    .toggle-slider::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 12px; height: 12px; border-radius: 50%; background: #fff;
+      transition: transform .2s;
+    }
+    .widget-toggle input:checked ~ .toggle-slider { background: var(--green); }
+    .widget-toggle input:checked ~ .toggle-slider::after { transform: translateX(16px); }
+
+    .modal-actions {
+      display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+    }
+
+    /* ── Toast ─────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 20px;
+      font-size: 14px; font-weight: 500; z-index: 999;
+      transform: translateY(80px); opacity: 0;
+      transition: transform .25s, opacity .25s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── Empty state ───────────────────────────────────────────────── */
+    .empty {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .empty h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot">MS</div>
+    <div>
+      <div class="logo-text">Marketing.Storage</div>
+      <div class="logo-sub">Widget License Dashboard</div>
+    </div>
+  </div>
+  <button class="btn btn-ghost btn-sm" id="logout-btn" style="display:none">Sign Out</button>
+</header>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="logo-dot" style="width:56px;height:56px;font-size:20px;border-radius:14px">MS</div>
+  <div>
+    <h2>Dashboard Access</h2>
+    <p>Enter your admin password to continue</p>
+  </div>
+  <input type="password" id="password-input" placeholder="••••••••" autocomplete="current-password" />
+  <button class="btn btn-primary" id="login-btn">Sign In</button>
+  <p id="login-error" style="color:var(--red);font-size:13px;display:none">Incorrect password</p>
+</div>
+
+<!-- ── APP ───────────────────────────────────────────────────────────── -->
+<main id="app-screen">
+
+  <div class="top-bar">
+    <h1>Clients</h1>
+    <button class="btn btn-primary" id="add-client-btn">+ Add Client</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">Total Clients</div>
+      <div class="value orange" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Active</div>
+      <div class="value green" id="stat-active">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Inactive</div>
+      <div class="value" id="stat-inactive" style="color:var(--red)">—</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Domain</th>
+          <th>Site ID</th>
+          <th>Status</th>
+          <th>Widgets</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="client-tbody"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ── ADD / EDIT MODAL ───────────────────────────────────────────────── -->
+<div class="modal-bg" id="client-modal">
+  <div class="modal">
+    <h2 id="modal-title">Add Client</h2>
+    <p class="modal-sub">Enter the client's site details and select which widgets they've licensed.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Company Name</label>
+        <input type="text" id="f-company" placeholder="Acme Storage" />
+      </div>
+      <div class="field">
+        <label>Domain (live site)</label>
+        <input type="text" id="f-site" placeholder="acmestorage.com" />
+      </div>
+      <div class="field">
+        <label>Duda Site ID</label>
+        <input type="text" id="f-siteid" placeholder="ed54224e" />
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="f-activate">
+          <option value="Empowered">🟢 Active (Empowered)</option>
+          <option value="Inactive">🔴 Inactive</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Licensed Widgets</label>
+        <div class="widget-grid" id="widget-checkboxes"></div>
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Notes</label>
+        <input type="text" id="f-notes" placeholder="e.g. Paid monthly, trial until March" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save Client</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+// IMPORTANT: Change this password before deploying!
+// In production, replace with a real authentication flow.
+const ADMIN_PASSWORD = "ms-admin-2026";
+
+// The Cloudflare Worker URL that manages KV reads/writes
+// This is a separate "admin" endpoint — NOT the same as the license-check Worker
+const ADMIN_API = "https://ms-license-admin.marketing.storage";
+
+// All 9 widget names and their display labels
+const WIDGETS = [
+  { id: "adv-nav-desktop",      label: "Nav (Desktop)" },
+  { id: "adv-nav-mobile",       label: "Nav (Mobile)"  },
+  { id: "adv-logo",             label: "Dynamic Logo"  },
+  { id: "adv-button-primary",   label: "Button Primary" },
+  { id: "adv-button-secondary", label: "Button Secondary" },
+  { id: "adv-carousel",         label: "Image Carousel" },
+  { id: "adv-facility-cards",   label: "Facility Cards" },
+  { id: "adv-breadcrumb",       label: "Breadcrumb"    },
+  { id: "adv-reviews",          label: "Google Reviews" },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let clients = [];      // Array of client objects from KV
+let editingSlug = null; // Slug of client being edited (null = new)
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+document.getElementById("login-btn").addEventListener("click", attemptLogin);
+document.getElementById("password-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") attemptLogin();
+});
+
+function attemptLogin() {
+  const pw = document.getElementById("password-input").value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app-screen").style.display = "block";
+    document.getElementById("logout-btn").style.display = "block";
+    loadClients();
+  } else {
+    document.getElementById("login-error").style.display = "block";
+    document.getElementById("password-input").value = "";
+  }
+}
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app-screen").style.display = "none";
+  document.getElementById("logout-btn").style.display = "none";
+});
+
+// ── LOAD CLIENT LIST ──────────────────────────────────────────────────────────
+async function loadClients() {
+  try {
+    const res = await fetch(`${ADMIN_API}/admin/clients`);
+    clients = await res.json();
+  } catch {
+    // Fallback: demo data so the dashboard works before Worker is wired up
+    clients = [
+      {
+        slug: "ms-widget-testing",
+        company: "MS Widget Testing",
+        site: "widget-testing-ground.com",
+        siteid: "ed54224e",
+        activate: "Empowered",
+        widgets: { "adv-nav-desktop": true, "adv-carousel": true, "adv-logo": true },
+        notes: "Internal test site"
+      }
+    ];
+  }
+  renderTable();
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById("client-tbody");
+  const total   = clients.length;
+  const active  = clients.filter(c => c.activate?.toLowerCase() === "empowered").length;
+  const inactive = total - active;
+
+  document.getElementById("stat-total").textContent   = total;
+  document.getElementById("stat-active").textContent  = active;
+  document.getElementById("stat-inactive").textContent = inactive;
+
+  if (total === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty">
+      <h3>No clients yet</h3>
+      <p>Click "Add Client" to license your first site.</p>
+    </div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = clients.map(c => {
+    const isActive = c.activate?.toLowerCase() === "empowered";
+    const dots = WIDGETS.map(w =>
+      `<div class="wdot ${c.widgets?.[w.id] ? 'wdot-on' : 'wdot-off'}" title="${w.label}"></div>`
+    ).join("");
+
+    return `<tr>
+      <td><strong>${esc(c.company)}</strong>${c.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(c.notes)}</div>` : ''}</td>
+      <td style="font-family:monospace;font-size:13px">${esc(c.site)}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${esc(c.siteid)}</td>
+      <td><span class="badge ${isActive ? 'badge-on' : 'badge-off'}">${isActive ? 'Active' : 'Inactive'}</span></td>
+      <td><div class="widget-dots">${dots}</div></td>
+      <td>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="openEdit('${c.slug}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deactivateClient('${c.slug}')">
+            ${isActive ? 'Deactivate' : 'Activate'}
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ── ADD / EDIT MODAL ──────────────────────────────────────────────────────────
+document.getElementById("add-client-btn").addEventListener("click", () => openModal(null));
+document.getElementById("modal-cancel").addEventListener("click", closeModal);
+document.getElementById("client-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("client-modal")) closeModal();
+});
+
+function openModal(slug) {
+  editingSlug = slug;
+  const client = slug ? clients.find(c => c.slug === slug) : null;
+  document.getElementById("modal-title").textContent = client ? "Edit Client" : "Add Client";
+
+  document.getElementById("f-company").value  = client?.company  || "";
+  document.getElementById("f-site").value     = client?.site     || "";
+  document.getElementById("f-siteid").value   = client?.siteid   || "";
+  document.getElementById("f-activate").value = client?.activate || "Empowered";
+  document.getElementById("f-notes").value    = client?.notes    || "";
+
+  // Build widget checkboxes
+  const grid = document.getElementById("widget-checkboxes");
+  grid.innerHTML = WIDGETS.map(w => {
+    const checked = client?.widgets?.[w.id] ? "checked" : "";
+    return `<label class="widget-toggle">
+      <span>${w.label}</span>
+      <input type="checkbox" name="w-${w.id}" ${checked}>
+      <div class="toggle-slider"></div>
+    </label>`;
+  }).join("");
+
+  document.getElementById("client-modal").classList.add("open");
+}
+
+function openEdit(slug) { openModal(slug); }
+function closeModal() { document.getElementById("client-modal").classList.remove("open"); }
+
+document.getElementById("modal-save").addEventListener("click", saveClient);
+
+async function saveClient() {
+  const company = document.getElementById("f-company").value.trim();
+  const site    = document.getElementById("f-site").value.trim().toLowerCase().replace(/^www\./,"").replace(/\/$/,"");
+  const siteid  = document.getElementById("f-siteid").value.trim().toLowerCase();
+  const activate = document.getElementById("f-activate").value;
+  const notes   = document.getElementById("f-notes").value.trim();
+
+  if (!company || !site) { toast("Company name and domain are required."); return; }
+
+  // Collect widget toggles
+  const widgets = {};
+  WIDGETS.forEach(w => {
+    const cb = document.querySelector(`input[name="w-${w.id}"]`);
+    widgets[w.id] = cb ? cb.checked : false;
+  });
+
+  const slug = editingSlug || slugify(company);
+  const clientData = { slug, company, site, siteid, activate, widgets, notes };
+
+  try {
+    await fetch(`${ADMIN_API}/admin/client`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(clientData)
+    });
+  } catch {
+    // Offline / not yet configured: update local state only (demo mode)
+  }
+
+  // Update local state
+  const idx = clients.findIndex(c => c.slug === slug);
+  if (idx >= 0) clients[idx] = clientData; else clients.push(clientData);
+
+  closeModal();
+  renderTable();
+  toast(`${company} ${editingSlug ? "updated" : "added"} successfully`);
+}
+
+async function deactivateClient(slug) {
+  const client = clients.find(c => c.slug === slug);
+  if (!client) return;
+  const isActive = client.activate?.toLowerCase() === "empowered";
+  client.activate = isActive ? "Inactive" : "Empowered";
+
+  try {
+    await fetch(`${ADMIN_API}/admin/client`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(client)
+    });
+  } catch {}
+
+  renderTable();
+  toast(`${client.company} ${isActive ? "deactivated" : "activated"}`);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function slugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function esc(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 2800);
+}
+</script>
+</body>
+</html>
