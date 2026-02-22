@@ -1,16 +1,7 @@
-/**
- * widget.js — adv-nav-desktop (M.S. Navigation - Desktop V3)
- * Hosted at: widgets.marketing.storage/widgets/adv-nav-desktop/v1/widget.js
- *
- * This file contains the full widget logic, wrapped with a license check.
- * The Duda wrapper widget calls: window.MSWidgets["adv-nav-desktop"].init(container, props)
- * where props.dudaData = Duda's `data` object (config + settings from the widget panel)
- */
 (function () {
 
     const WIDGET_ID = "adv-nav-desktop";
 
-    // ── All CSS for this widget ────────────────────────────────────────────────
     const WIDGET_CSS = `
 .widget-c31e05 .facility-widget {
   width: 100%;
@@ -68,7 +59,6 @@
 }
 `;
 
-    // ── Inject CSS once per page load ─────────────────────────────────────────
     function injectCSS() {
         if (document.getElementById("ms-css-" + WIDGET_ID)) return;
         var style = document.createElement("style");
@@ -77,10 +67,8 @@
         document.head.appendChild(style);
     }
 
-    // ── Public interface ───────────────────────────────────────────────────────
     async function init(container, props) {
 
-        // 1. License check
         if (!window.MSLicenseCheck) {
             container.innerHTML = '<div style="padding:12px;color:#888;font-size:13px;">License module unavailable.</div>';
             return;
@@ -91,11 +79,9 @@
             return;
         }
 
-        // 2. Inject CSS and mark container with the widget class for CSS scoping
         injectCSS();
         container.classList.add("widget-c31e05");
 
-        // 3. Set initial HTML (same as original widget HTML)
         var stackDir = (props.dudaData && props.dudaData.config && props.dudaData.config.stackingDirection) || "row";
         var wrapCols = (props.dudaData && props.dudaData.config && props.dudaData.config.wrapColumns);
         container.innerHTML = `
@@ -110,13 +96,8 @@
       </div>
     `;
 
-        // 4. Run full widget logic
-        // `data`    → props.dudaData  (Duda widget settings, passed from the wrapper)
-        // `element` → container       (the widget's DOM root, passed from the wrapper)
         var data = props.dudaData || { config: {} };
         var element = container;
-
-        // ── Everything below is your original widget JS, unchanged ────────────────
 
         var allFacilityData = [];
         var currentPage = 1;
