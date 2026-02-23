@@ -3,59 +3,264 @@
     const WIDGET_ID = "adv-nav-desktop";
 
     const WIDGET_CSS = `
-.widget-c31e05 .facility-widget {
+.widget-d7400b .dynamic-navigation-widget {
   width: 100%;
-  padding: 20px 0;
+  font-family: inherit;
 }
-.widget-c31e05 .facility-columns-container {
+.widget-d7400b .dynamic-navigation-widget .nav-container {
+  position: relative;
+  z-index: 1000;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  gap: 20px;
-  align-items: stretch;
+  align-items: center;
+  justify-content: var(--nav-justify, var(--nav-alignment, flex-start));
+  background: transparent;
+  width: 100%;
 }
-.widget-c31e05 .facility-columns-container.stacked-horizontally { flex-direction: row; }
-.widget-c31e05 .facility-columns-container.stacked-vertically { flex-direction: column; align-items: center; }
-.widget-c31e05 .facility-columns-container.wrap-enabled { flex-wrap: wrap; justify-content: center; }
-.widget-c31e05 .facility-columns-container.wrap-disabled { flex-wrap: nowrap; justify-content: center; }
-.widget-c31e05 .facility-column {
-  min-width: 250px; max-width: 350px; background: #ffffff;
-  border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden;
-  transition: all 0.3s ease; display: flex; flex-direction: column;
+.widget-d7400b .dynamic-navigation-widget .nav-main-list.spread-items .nav-item {
+  flex: 1;
 }
-.widget-c31e05 .facility-columns-container.wrap-enabled .facility-column { flex: 0 0 auto; }
-.widget-c31e05 .facility-columns-container.wrap-disabled .facility-column { flex: 0 1 auto; }
-.widget-c31e05 .facility-image-container { width: 100%; height: 200px; overflow: hidden; position: relative; flex-shrink: 0; }
-.widget-c31e05 .facility-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-.widget-c31e05 .facility-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; align-items: center; text-align: center; }
-.widget-c31e05 .facility-name { font-size: 1.25rem; font-weight: 600; color: #333; margin: 0 0 10px 0; line-height: 1.3; text-align: center; }
-.widget-c31e05 .facility-address { font-size: 0.95rem; color: #666; margin: 0 0 20px 0; line-height: 1.4; flex-grow: 1; text-align: center; }
-.widget-c31e05 .facility-debug-info { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin: 10px 0 15px 0; font-size: 0.85rem; text-align: left; width: 100%; box-sizing: border-box; }
-.widget-c31e05 .facility-debug-info .debug-item { margin: 5px 0; color: #495057; word-break: break-word; }
-.widget-c31e05 .facility-debug-info .debug-item strong { color: #212529; font-weight: 600; }
-.widget-c31e05 .facility-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: auto; width: 100%; align-items: center; }
-.widget-c31e05 .facility-link-button,
-.widget-c31e05 .facility-phone-button { display: inline-block; padding: 12px 20px; text-decoration: none; border-radius: 5px; text-align: center; font-weight: 500; transition: all 0.3s ease; font-size: 0.95rem; width: 100%; box-sizing: border-box; }
-.widget-c31e05 .facility-link-button { background-color: #007cba; color: white; border: 2px solid #007cba; }
-.widget-c31e05 .facility-link-button:hover { background-color: #005a87; border-color: #005a87; }
-.widget-c31e05 .facility-phone-button { background-color: transparent; color: #007cba; border: 2px solid #007cba; }
-.widget-c31e05 .facility-phone-button:hover { background-color: #007cba; color: white; }
-.widget-c31e05 .no-facilities-message { text-align: center; padding: 40px 20px; color: #666; font-size: 1.1rem; width: 100%; }
-.widget-c31e05 .facility-pagination-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px 0; }
-.widget-c31e05 .pagination-btn { padding: 10px 20px; background-color: #555555; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: all 0.3s ease; }
-.widget-c31e05 .pagination-btn:hover:not(:disabled) { background-color: #333333; }
-.widget-c31e05 .pagination-btn:disabled { background-color: #ccc; cursor: not-allowed; opacity: 0.6; }
-.widget-c31e05 .pagination-numbers { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-.widget-c31e05 .pagination-number { padding: 8px 12px; background-color: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; }
-.widget-c31e05 .pagination-number:hover { background-color: #e0e0e0; }
-.widget-c31e05 .pagination-number.active { background-color: #555555; color: white; border-color: #555555; font-weight: 600; }
-@media (min-width: 768px) and (max-width: 1024px) { .widget-c31e05 .facility-column { min-width: 200px; } }
+.widget-d7400b .dynamic-navigation-widget .nav-main-list.spread-items .nav-item .nav-link {
+  text-align: center;
+  justify-content: center;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-item {
+  position: relative;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-item.nav-main-item {
+  margin-left: var(--nav-item-margin, 0px);
+  margin-right: var(--nav-item-margin, 0px);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-item .nav-link {
+  padding-left: var(--nav-item-padding, 16px);
+  padding-right: var(--nav-item-padding, 16px);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-link {
+  display: flex;
+  align-items: center;
+  padding-top: var(--nav-text-spacing, 12px);
+  padding-bottom: var(--nav-text-spacing, 12px);
+  color: var(--nav-text-color, #000000);
+  text-decoration: none;
+  font-size: var(--nav-font-size, 14px);
+  font-weight: var(--nav-font-weight, 500);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-link:hover {
+  color: var(--nav-text-hover-color, #000000);
+  background-color: var(--nav-bg-hover-color, transparent);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-link.current-page {
+  color: var(--nav-text-selected-color, #000000);
+  background-color: var(--nav-bg-selected-color, transparent);
+  font-weight: var(--nav-current-font-weight, 600);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-link.current-page-parent {
+  color: var(--nav-text-selected-color, #000000);
+  background-color: var(--nav-bg-selected-color, transparent);
+  font-weight: var(--nav-current-font-weight, 600);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item > .nav-link {
+  border: var(--border-width, 0px) solid transparent !important;
+  border-radius: var(--border-radius, 0px) !important;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item > .nav-link:hover {
+  border-color: var(--border-color-active, #000000) !important;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item > .nav-link.current-page {
+  border-color: var(--border-color-active, #000000) !important;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item > .nav-link.current-page-parent {
+  border-color: var(--border-color-active, #000000) !important;
+}
+.widget-d7400b .dynamic-navigation-widget .dropdown-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  width: 10px;
+  height: 10px;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.widget-d7400b .dynamic-navigation-widget .dropdown-arrow svg {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.25s ease;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item > .nav-link .dropdown-arrow svg {
+  transform: rotate(0deg);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item:hover > .nav-link .dropdown-arrow svg {
+  transform: rotate(180deg);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item.dropdown-open > .nav-link .dropdown-arrow svg {
+  transform: rotate(180deg);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .dropdown-arrow svg {
+  transform: rotate(-90deg);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .has-dropdown:hover > .nav-link .dropdown-arrow svg {
+  transform: rotate(90deg);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .has-dropdown.dropdown-open > .nav-link .dropdown-arrow svg {
+  transform: rotate(90deg);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown {
+  position: absolute;
+  min-width: 200px;
+  max-width: 320px;
+  width: max-content;
+  background: var(--dropdown-bg-color, #ffffff);
+  border: var(--dropdown-border-width, 0px) solid var(--dropdown-border-color, transparent);
+  box-shadow: var(--dropdown-box-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+  list-style: none;
+  margin: 0;
+  padding: 0 !important;
+  display: none;
+  z-index: 1001;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  overflow: hidden !important;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner::-webkit-scrollbar {
+  width: 8px;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-dropdown {
+  z-index: 10000 !important;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown.show {
+  opacity: 1;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-main-item > .nav-dropdown {
+  top: 100%;
+  left: 0;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .has-dropdown > .nav-dropdown {
+  top: 0;
+  left: 100%;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner > .nav-item {
+  border-bottom: 1px solid var(--dropdown-divider-color, #f0f0f0);
+  flex: none;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner > .nav-item:last-child {
+  border-bottom: none;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-link {
+  border-radius: 0px !important;
+  border: none !important;
+  padding-top: var(--dropdown-text-spacing, 12px) !important;
+  padding-bottom: var(--dropdown-text-spacing, 12px) !important;
+  padding-left: var(--dropdown-item-padding, 20px) !important;
+  padding-right: var(--dropdown-item-padding, 20px) !important;
+  color: var(--dropdown-text-color, #000000);
+  justify-content: flex-start;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-link:hover {
+  color: var(--dropdown-text-hover-color, #ffffff);
+  background-color: var(--dropdown-bg-hover-color, #666666);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-link.current-page {
+  color: var(--dropdown-text-selected-color, #000000);
+  background-color: var(--dropdown-bg-selected-color, transparent);
+  font-weight: var(--nav-current-font-weight, 600);
+}
+.widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-link.current-page-parent {
+  color: var(--dropdown-text-selected-color, #000000);
+  background-color: var(--dropdown-bg-selected-color, transparent);
+  font-weight: var(--nav-current-font-weight, 600);
+}
+.widget-d7400b .dynamic-navigation-widget .loading-indicator {
+  padding: 20px;
+  text-align: center;
+  color: var(--loading-text-color, #666666);
+  font-size: 14px;
+}
 @media (max-width: 767px) {
-  .widget-c31e05 .facility-columns-container { flex-direction: column !important; gap: 15px !important; justify-content: flex-start !important; align-items: center !important; }
-  .widget-c31e05 .facility-column { min-width: 100%; max-width: 100%; flex: 1 1 auto !important; }
-  .widget-c31e05 .facility-content { padding: 15px; }
-  .widget-c31e05 .facility-buttons { flex-direction: column; }
-  .widget-c31e05 .facility-pagination-controls { gap: 8px; }
-  .widget-c31e05 .pagination-btn { padding: 8px 16px; font-size: 0.85rem; }
-  .widget-c31e05 .pagination-number { padding: 6px 10px; font-size: 0.85rem; }
+  .widget-d7400b .dynamic-navigation-widget .nav-main-list {
+    flex-direction: column;
+    width: 100%;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-main-list.spread-items .nav-item {
+    flex: none;
+    width: 100%;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-item {
+    width: 100%;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-item.nav-main-item {
+    border-bottom: 1px solid var(--nav-border-color, #e0e0e0);
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-item.nav-main-item:last-child {
+    border-bottom: none;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-dropdown {
+    position: static;
+    display: none;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid var(--dropdown-divider-color, #f0f0f0);
+    opacity: 1;
+    max-width: none;
+    overflow: visible !important;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-dropdown-scroll-inner {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-link {
+    padding-left: calc(var(--dropdown-item-padding, 20px) + 12px) !important;
+  }
+  .widget-d7400b .dynamic-navigation-widget .nav-dropdown .nav-dropdown .nav-link {
+    padding-left: calc(var(--dropdown-item-padding, 20px) + 28px) !important;
+  }
+  .widget-d7400b .dynamic-navigation-widget .has-dropdown .nav-link {
+    cursor: pointer;
+  }
+  .widget-d7400b .dynamic-navigation-widget .has-dropdown.dropdown-open .nav-dropdown {
+    display: block;
+  }
 }
 `;
 
@@ -80,398 +285,749 @@
         }
 
         injectCSS();
-        container.classList.add("widget-c31e05");
+        container.classList.add("widget-d7400b");
 
-        var stackDir = (props.dudaData && props.dudaData.config && props.dudaData.config.stackingDirection) || "row";
-        var wrapCols = (props.dudaData && props.dudaData.config && props.dudaData.config.wrapColumns);
         container.innerHTML = `
-      <div class="facility-widget">
-        <div class="facility-columns-container ${stackDir === 'column' ? 'stacked-vertically' : 'stacked-horizontally'} ${wrapCols ? 'wrap-enabled' : 'wrap-disabled'}">
-        </div>
-        <div class="facility-pagination-controls">
-          <button class="pagination-btn prev-btn" disabled>Previous</button>
-          <div class="pagination-numbers"></div>
-          <button class="pagination-btn next-btn">Next</button>
-        </div>
-      </div>
-    `;
+<div class="dynamic-navigation-widget">
+  <nav class="nav-container" role="navigation">
+    <ul class="nav-main-list">
+      <!-- Navigation will be populated by JavaScript -->
+    </ul>
+  </nav>
+  <div class="loading-indicator" style="display: none;">
+    <span>Loading navigation...</span>
+  </div>
+</div>
+        `;
 
         var data = props.dudaData || { config: {} };
         var element = container;
 
-        var allFacilityData = [];
-        var currentPage = 1;
-        var facilitiesPerPage = 10;
-        var filteredColumns = [];
-        var additionalFacilitySourceMap = {};
+        // --- ORIGINAL WIDGET LOGIC ---
 
-        async function initFacilityWidget() {
-            try {
-                const collection = await window.dmAPI.loadCollectionsAPI();
-                facilitiesPerPage = parseInt(data.config.facilitiesPerPage) || 10;
-                allFacilityData = await fetchAllFacilities(collection, data.config.collectionName || 'facilities');
-
-                let additionalCollectionData = [];
-                if (data.config.additionalCollectionName && data.config.additionalCollectionName.trim() !== '') {
-                    additionalCollectionData = await fetchAllFacilities(collection, data.config.additionalCollectionName.trim());
-                }
-
-                const facilityFilter = data.config.facilityFilter || 'Portfolio';
-                const customGroupings = data.config.customGroupings || [];
-                let stateCity = data.config.stateCity || '';
-
-                if (!stateCity || stateCity.trim() === '') {
-                    if (facilityFilter === 'State' || facilityFilter === 'City' || facilityFilter === 'Brand') {
-                        stateCity = getCurrentPageItemUrl();
-                    }
-                }
-
-                const currentFacility = getCurrentPageFacility();
-                const additionalSlugs = additionalCollectionData.length > 0 && currentFacility
-                    ? extractAdditionalSlugs(additionalCollectionData, facilityFilter, currentFacility)
-                    : [];
-
-                filteredColumns = processFilteredColumns(allFacilityData, facilityFilter, customGroupings, stateCity, additionalSlugs);
-                renderPage(currentPage);
-                renderPaginationControls();
-                applyDynamicCSS();
-                applyHoverEffects();
-                attachPaginationListeners();
-
-            } catch (error) {
-                console.error('Error initializing facility widget:', error);
-                showSampleData();
-                applyDynamicCSS();
-                applyHoverEffects();
-            }
+        try {
+            setCSSVariablesImmediately();
+            applyDesignSettings();
+            await buildCompleteNavigation();
+            detectAndMarkCurrentPage();
+        } catch (error) {
+            renderFallbackNavigation();
         }
 
-        async function fetchAllFacilities(collection, collectionName) {
-            const allData = [];
-            let pageNum = 0;
-            let hasMoreData = true;
-            while (hasMoreData) {
-                const response = await collection.data(collectionName).pageSize(100).pageNumber(pageNum).get();
-                if (response.values && response.values.length > 0) {
-                    allData.push(...response.values);
-                    pageNum++;
-                    if (response.values.length < 100) hasMoreData = false;
+        function setCSSVariablesImmediately() {
+            const borderWidth = data.config['navBorderWidth'] !== undefined ? data.config['navBorderWidth'] : 0;
+            const borderColor = data.config['navBorderColor'] || '#007cba';
+            const navContainer = element.querySelector('.nav-container');
+            navContainer.style.setProperty('--border-width', borderWidth + 'px');
+            navContainer.style.setProperty('--border-color-active', borderColor);
+        }
+
+        function applyDesignSettings() {
+            const navList = element.querySelector('.nav-main-list');
+            const alignment = data.config['navAlignment'];
+            if (alignment) {
+                let alignmentValue = 'flex-start';
+                switch (alignment) {
+                    case 'center': alignmentValue = 'center'; break;
+                    case 'right': alignmentValue = 'flex-end'; break;
+                    default: alignmentValue = 'flex-start';
+                }
+                navList.style.setProperty('--nav-alignment', alignmentValue);
+            }
+
+            const spreadItems = data.config['spreadItems'];
+            if (spreadItems) {
+                navList.classList.add('spread-items');
+                navList.style.setProperty('--nav-justify', 'space-between');
+            } else {
+                navList.classList.remove('spread-items');
+                navList.style.setProperty('--nav-justify', 'var(--nav-alignment, flex-start)');
+            }
+
+            const itemPadding = data.config['itemPadding'];
+            if (itemPadding !== undefined && itemPadding !== null) {
+                navList.style.setProperty('--nav-item-padding', itemPadding + 'px');
+            } else {
+                navList.style.setProperty('--nav-item-padding', '16px');
+            }
+
+            const textSpacing = data.config['textSpacing'];
+            if (textSpacing !== undefined && textSpacing !== null) {
+                navList.style.setProperty('--nav-text-spacing', textSpacing + 'px');
+            } else {
+                navList.style.setProperty('--nav-text-spacing', '12px');
+            }
+
+            const itemMargin = data.config['itemMargin'];
+            if (itemMargin !== undefined && itemMargin !== null) {
+                navList.style.setProperty('--nav-item-margin', itemMargin + 'px');
+            } else {
+                navList.style.setProperty('--nav-item-margin', '0px');
+            }
+
+            const dropdownOffset = data.config['dropdownOffset'];
+            let offsetValue = '5px';
+            if (dropdownOffset !== undefined && dropdownOffset !== null && dropdownOffset !== '') {
+                let numericOffset = 0;
+                if (typeof dropdownOffset === 'number') {
+                    numericOffset = dropdownOffset;
+                } else if (typeof dropdownOffset === 'string') {
+                    const cleanValue = dropdownOffset.replace(/px$/, '').trim();
+                    numericOffset = parseFloat(cleanValue);
                 } else {
-                    hasMoreData = false;
+                    numericOffset = Number(dropdownOffset);
+                }
+                if (!isNaN(numericOffset)) {
+                    offsetValue = numericOffset + 'px';
+                } else {
+                    offsetValue = '5px';
                 }
             }
-            return allData;
-        }
+            navList.style.setProperty('--dropdown-offset', offsetValue);
 
-        function getCurrentPageFacility() {
-            const urlSegment = getCurrentPageItemUrl();
-            if (!urlSegment) return null;
-            let currentFacility = allFacilityData.find(item => item.page_item_url === urlSegment);
-            if (!currentFacility) {
-                currentFacility = allFacilityData.find(item => {
-                    const slug = item.data['M.slug'];
-                    return slug && normalizeForComparison(slug) === normalizeForComparison(urlSegment);
-                });
+            const dropdownTextSpacing = data.config['dropdownTextSpacing'];
+            if (dropdownTextSpacing !== undefined && dropdownTextSpacing !== null) {
+                navList.style.setProperty('--dropdown-text-spacing', dropdownTextSpacing + 'px');
+            } else {
+                navList.style.setProperty('--dropdown-text-spacing', '12px');
             }
-            if (!currentFacility) {
-                currentFacility = allFacilityData.find(item => {
-                    const pageUrl = item.page_item_url;
-                    if (!pageUrl) return false;
-                    const n1 = normalizeForComparison(pageUrl);
-                    const n2 = normalizeForComparison(urlSegment);
-                    return n1.includes(n2) || n2.includes(n1);
-                });
+
+            const dropdownItemPadding = data.config['dropdownItemPadding'];
+            if (dropdownItemPadding !== undefined && dropdownItemPadding !== null) {
+                navList.style.setProperty('--dropdown-item-padding', dropdownItemPadding + 'px');
+            } else {
+                navList.style.setProperty('--dropdown-item-padding', '20px');
             }
-            return currentFacility;
         }
 
-        function extractAdditionalSlugs(additionalCollectionData, facilityFilter, currentFacility) {
-            const slugsToAdd = [];
-            let matchField = '', matchValue = '';
-            if (facilityFilter === 'City') { matchField = 'M.city'; matchValue = currentFacility.data['M.city']; }
-            else if (facilityFilter === 'State') { matchField = 'M.state'; matchValue = currentFacility.data['M.state']; }
-            else return slugsToAdd;
-            if (!matchValue || matchValue.trim() === '') return slugsToAdd;
-            const normalizedMatchValue = normalizeForComparison(matchValue);
-            const matchingRows = additionalCollectionData.filter(item => {
-                const fieldValue = item.data[matchField];
-                return fieldValue && normalizeForComparison(fieldValue) === normalizedMatchValue;
+        function detectAndMarkCurrentPage() {
+            const currentUrl = getCurrentPageUrl();
+            const allNavLinks = element.querySelectorAll('.nav-link');
+            const matches = [];
+
+            allNavLinks.forEach(link => {
+                link.classList.remove('current-page', 'current-page-parent');
             });
-            const fieldsToCheck = ['M.add-fac-01', 'M.add-fac-02', 'M.add-fac-03', 'M.add-fac-04', 'M.add-fac-05', 'M.add-fac-06', 'M.add-fac-07', 'M.add-fac-08', 'M.add-fac-09', 'M.add-fac-10'];
-            matchingRows.forEach(item => {
-                fieldsToCheck.forEach(fieldName => {
-                    const slugValue = item.data[fieldName];
-                    if (slugValue && slugValue.trim() !== '') {
-                        const trimmedSlug = slugValue.trim();
-                        const facilityExists = allFacilityData.find(fac => {
-                            const facSlug = fac.data['M.slug'];
-                            return facSlug && normalizeForComparison(facSlug) === normalizeForComparison(trimmedSlug);
-                        });
-                        if (facilityExists && !additionalFacilitySourceMap[trimmedSlug]) {
-                            slugsToAdd.push(trimmedSlug);
-                            additionalFacilitySourceMap[trimmedSlug] = fieldName;
-                        }
-                    }
-                });
-            });
-            return slugsToAdd;
-        }
 
-        function normalizeForComparison(value) {
-            if (!value) return '';
-            return value.toString().toLowerCase().trim().replace(/-/g, ' ').replace(/\s+/g, ' ');
-        }
+            allNavLinks.forEach((link, index) => {
+                const linkUrl = link.getAttribute('href');
+                const linkText = link.textContent.trim();
+                let isMatch = false;
 
-        function processFilteredColumns(facilityData, facilityFilter, customGroupings, stateCity, additionalSlugs) {
-            let columnsToCreate = [];
-            const normalizedFilter = normalizeForComparison(stateCity);
-            if (facilityFilter === 'Portfolio') {
-                const uniqueSlugs = [...new Set(facilityData.map(item => item.data['M.slug']).filter(Boolean))];
-                columnsToCreate = uniqueSlugs.map(slug => ({ slug, type: 'portfolio' }));
-            } else if (facilityFilter === 'State') {
-                const uniqueCombinations = new Set();
-                facilityData.forEach(item => {
-                    const slug = item.data['M.slug'], state = item.data['M.state'];
-                    if (slug && state && (!normalizedFilter || normalizeForComparison(state) === normalizedFilter)) uniqueCombinations.add(`${slug}|${state}`);
-                });
-                columnsToCreate = [...uniqueCombinations].map(combo => { const [slug, state] = combo.split('|'); return { slug, state, type: 'state' }; });
-            } else if (facilityFilter === 'City') {
-                const uniqueCombinations = new Set();
-                facilityData.forEach(item => {
-                    const slug = item.data['M.slug'], city = item.data['M.city'];
-                    if (slug && city && (!normalizedFilter || normalizeForComparison(city) === normalizedFilter)) uniqueCombinations.add(`${slug}|${city}`);
-                });
-                columnsToCreate = [...uniqueCombinations].map(combo => { const [slug, city] = combo.split('|'); return { slug, city, type: 'city' }; });
-            } else if (facilityFilter === 'Brand') {
-                const uniqueCombinations = new Set();
-                facilityData.forEach(item => {
-                    const slug = item.data['M.slug'], brand = item.data['M.fac-brand'], pageItemUrl = item.page_item_url;
-                    if (slug) {
-                        let shouldInclude = false;
-                        if (!normalizedFilter) { shouldInclude = true; }
-                        else {
-                            if (brand) { const nb = normalizeForComparison(brand); if (nb === normalizedFilter || nb.includes(normalizedFilter) || normalizedFilter.includes(nb)) shouldInclude = true; }
-                            if (!shouldInclude && pageItemUrl) { const nu = normalizeForComparison(pageItemUrl); if (nu.includes(normalizedFilter) || normalizedFilter.includes(nu)) shouldInclude = true; }
-                        }
-                        if (shouldInclude && brand) uniqueCombinations.add(`${slug}|${brand}`);
-                    }
-                });
-                columnsToCreate = [...uniqueCombinations].map(combo => { const [slug, brand] = combo.split('|'); return { slug, brand, type: 'brand' }; });
-            } else if (facilityFilter === 'Custom') {
-                customGroupings.forEach(grouping => { if (grouping.customSlug && grouping.customSlug.trim() !== '') columnsToCreate.push({ slug: grouping.customSlug.trim(), type: 'custom' }); });
-            } else if (facilityFilter === 'Nearby') {
-                const currentPageSlug = getCurrentPageSlug();
-                if (currentPageSlug) {
-                    const currentFacility = facilityData.find(item => item.data['M.slug'] === currentPageSlug);
-                    if (currentFacility) {
-                        ['M.nearby-01', 'M.nearby-02', 'M.nearby-03'].forEach(field => {
-                            const nearbySlug = currentFacility.data[field];
-                            if (nearbySlug && nearbySlug.trim() !== '') columnsToCreate.push({ slug: nearbySlug.trim(), type: 'nearby' });
-                        });
+                if (linkUrl && linkUrl !== '#') {
+                    const normalizedLinkUrl = normalizeUrl(linkUrl);
+                    const normalizedCurrentUrl = normalizeUrl(currentUrl);
+
+                    if (isHomePage(normalizedCurrentUrl) && isHomePage(normalizedLinkUrl)) {
+                        isMatch = true;
+                        matches.push({ text: linkText, url: linkUrl, reason: 'HOME_PAGE_MATCH' });
+                    } else if (!isHomePage(normalizedCurrentUrl) && !isHomePage(normalizedLinkUrl) && normalizedLinkUrl === normalizedCurrentUrl) {
+                        isMatch = true;
+                        matches.push({ text: linkText, url: linkUrl, reason: 'EXACT_MATCH' });
                     }
                 }
-                customGroupings.forEach(grouping => { if (grouping.customSlug && grouping.customSlug.trim() !== '') columnsToCreate.push({ slug: grouping.customSlug.trim(), type: 'custom' }); });
-            }
-            if ((facilityFilter === 'State' || facilityFilter === 'City' || facilityFilter === 'Brand') && customGroupings.length > 0) {
-                customGroupings.forEach(grouping => { if (grouping.customSlug && grouping.customSlug.trim() !== '') columnsToCreate.push({ slug: grouping.customSlug.trim(), type: 'custom' }); });
-            }
-            if (additionalSlugs.length > 0) additionalSlugs.forEach(slug => columnsToCreate.push({ slug, type: 'additional-collection' }));
-            return columnsToCreate;
-        }
 
-        function scrollToTop() {
-            const widgetTop = element.getBoundingClientRect().top + window.pageYOffset;
-            window.scrollTo({ top: widgetTop - 120, behavior: 'smooth' });
-        }
+                if (isMatch) {
+                    link.classList.add('current-page');
+                    const navItem = link.closest('.nav-item');
+                    const isMainNavItem = navItem && navItem.classList.contains('nav-main-item');
+                    const isInDropdown = link.closest('.nav-dropdown');
 
-        function renderPage(pageNumber) {
-            const container2 = element.querySelector('.facility-columns-container');
-            container2.innerHTML = '';
-            const startIndex = (pageNumber - 1) * facilitiesPerPage;
-            const endIndex = Math.min(startIndex + facilitiesPerPage, filteredColumns.length);
-            const pageColumns = filteredColumns.slice(startIndex, endIndex);
-            pageColumns.forEach((column, index) => {
-                const facilityInfo = allFacilityData.find(item => {
-                    const itemSlug = item.data['M.slug'];
-                    return itemSlug && normalizeForComparison(itemSlug) === normalizeForComparison(column.slug);
-                });
-                if (facilityInfo) container2.appendChild(createColumnElement(facilityInfo, index, column));
+                    if (!isMainNavItem && isInDropdown && !isLinkPageRedirect(link, currentUrl)) {
+                        markParentItemsAsActive(link);
+                    }
+                }
             });
-            if (pageColumns.length === 0) container2.innerHTML = '<p class="no-facilities-message">No facilities found matching your criteria.</p>';
         }
 
-        function getBrandColorsForCurrentPage() {
-            const startIndex = (currentPage - 1) * facilitiesPerPage;
-            const firstColumn = filteredColumns[startIndex];
-            if (firstColumn) {
-                const facilityInfo = allFacilityData.find(item => item.data['M.slug'] === firstColumn.slug);
-                if (facilityInfo) return { primary: facilityInfo.data['M.c-primary'] || '', cta: facilityInfo.data['M.c-cta'] || '', light: facilityInfo.data['M.c-light'] || '', dark: facilityInfo.data['M.c-dark'] || '' };
+        function isLinkPageRedirect(linkElement, currentUrl) {
+            const linkUrl = linkElement.getAttribute('href');
+            const isInDropdown = !!linkElement.closest('.nav-dropdown');
+            const parentDropdown = linkElement.closest('.has-dropdown');
+            if (isInDropdown && linkUrl && parentDropdown) {
+                const normalizedLinkUrl = normalizeUrl(linkUrl);
+                const normalizedCurrentUrl = normalizeUrl(currentUrl);
+                return normalizedLinkUrl === normalizedCurrentUrl;
+            }
+            return false;
+        }
+
+        function getCurrentPageUrl() {
+            const methods = [
+                () => window.location.pathname,
+                () => window.location.href.replace(window.location.origin, ''),
+                () => document.location.pathname
+            ];
+            for (const method of methods) {
+                try {
+                    const url = method();
+                    if (url) return normalizeUrl(url);
+                } catch (e) {
+                    continue;
+                }
+            }
+            return '/';
+        }
+
+        function normalizeUrl(url) {
+            if (!url) return '/';
+            let normalized = url.toString().toLowerCase()
+                .replace(/^https?:\/\/[^\/]+/, '')
+                .replace(/[?#].*$/, '')
+                .replace(/\/$/, '');
+            if (!normalized.startsWith('/')) normalized = '/' + normalized;
+            if (normalized === '') normalized = '/';
+            return normalized;
+        }
+
+        function isHomePage(url) {
+            if (!url) return false;
+            const normalizedUrl = normalizeUrl(url);
+            const homePatterns = ['/', '/home', '/index', '/index.html', '/index.htm', '/main', '/homepage', '/default'];
+            return homePatterns.includes(normalizedUrl);
+        }
+
+        function markParentItemsAsActive(activeLink) {
+            let currentDropdown = activeLink.closest('.nav-dropdown');
+            if (!currentDropdown) return;
+            while (currentDropdown) {
+                const parentNavItem = currentDropdown.parentElement.closest('.nav-item.has-dropdown');
+                if (parentNavItem) {
+                    const parentLink = parentNavItem.querySelector(':scope > .nav-link');
+                    if (parentLink && !parentLink.classList.contains('current-page')) {
+                        const isMainNavParent = parentNavItem.classList.contains('nav-main-item');
+                        if (!isMainNavParent) {
+                            parentLink.classList.add('current-page-parent');
+                        }
+                    }
+                }
+                currentDropdown = currentDropdown.parentElement?.closest('.nav-dropdown');
+            }
+        }
+
+        function sanitizeUrlSegment(segment) {
+            if (!segment || typeof segment !== 'string') return '';
+            let sanitized = segment.toLowerCase()
+                .replace(/\s*&\s*/g, '-and-')
+                .replace(/\./g, '-')
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-]/g, '')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            if (!sanitized) sanitized = segment.replace(/[^\w]/g, '').toLowerCase() || 'page';
+            return sanitized;
+        }
+
+        async function buildCompleteNavigation() {
+            const navContainer = element.querySelector('.nav-main-list');
+            navContainer.innerHTML = '';
+
+            const showSitePages = data.config['showSitePages'];
+            const customLinks = data.config['customLinks'] || [];
+            const collectionName = data.config['collectionName'];
+            const locationsPageLink = data.config['locationsPage'];
+
+            let navigationPages = [];
+
+            if (showSitePages) {
+                navigationPages = await getSitePages();
+            }
+
+            if (customLinks && customLinks.length > 0) {
+                customLinks.forEach((linkData, index) => {
+                    if (linkData.linkText && linkData.linkUrl) {
+                        navigationPages.push({
+                            name: linkData.linkText,
+                            url: getCustomLinkUrl(linkData.linkUrl),
+                            order: navigationPages.length + index,
+                            children: [],
+                            isFolder: false,
+                            isCustomLink: true
+                        });
+                    }
+                });
+            }
+
+            if (collectionName && collectionName.trim() !== '' && locationsPageLink && locationsPageLink !== '') {
+                const locationsPageUrl = extractUrlFromLinkData(locationsPageLink);
+                if (locationsPageUrl) {
+                    try {
+                        const allCollectionItems = await fetchAllCollectionItems(collectionName);
+                        if (allCollectionItems.length > 0) {
+                            const collectionHierarchy = buildCollectionHierarchy(allCollectionItems);
+                            addCollectionSubNavToPage(navigationPages, locationsPageUrl, collectionHierarchy);
+                        }
+                    } catch (error) {
+                        const sampleHierarchy = createSampleCollectionHierarchy();
+                        addCollectionSubNavToPage(navigationPages, locationsPageUrl, sampleHierarchy);
+                    }
+                }
+            }
+
+            if (navigationPages.length === 0) {
+                navigationPages = createSampleNavigationForPreview();
+            }
+
+            renderNavigationStructure(navContainer, navigationPages);
+
+            const loadingIndicator = element.querySelector('.loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        async function fetchAllCollectionItems(collectionName) {
+            const collectionAPI = await window.dmAPI.loadCollectionsAPI();
+            const allItems = [];
+            let currentPage = 0;
+            let hasMorePages = true;
+
+            while (hasMorePages) {
+                try {
+                    const response = await collectionAPI
+                        .data(collectionName)
+                        .pageSize(100)
+                        .pageNumber(currentPage)
+                        .get();
+                    if (response.values && response.values.length > 0) {
+                        allItems.push(...response.values);
+                        if (response.values.length < 100) {
+                            hasMorePages = false;
+                        } else {
+                            currentPage++;
+                        }
+                    } else {
+                        hasMorePages = false;
+                    }
+                } catch (error) {
+                    hasMorePages = false;
+                }
+            }
+            return allItems;
+        }
+
+        function createSampleNavigationForPreview() {
+            return [
+                { name: 'Home', url: '/', order: 0, children: [], isFolder: false },
+                {
+                    name: 'Locations', url: '/locations', order: 1, isFolder: true, isClickable: true,
+                    children: [
+                        {
+                            name: 'California', url: '/california', order: 0, isFolder: true, isClickable: true,
+                            children: [
+                                {
+                                    name: 'Los Angeles', url: '/california/los-angeles', order: 0, isFolder: true, isClickable: true,
+                                    children: [
+                                        { name: 'Downtown LA Storage', url: '/storage-units/downtown-la-storage', order: 0, children: [], isFolder: false, isClickable: true },
+                                        { name: 'Hollywood Storage', url: '/storage-units/hollywood-storage', order: 1, children: [], isFolder: false, isClickable: true }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                { name: 'About', url: '/about', order: 2, children: [], isFolder: false }
+            ];
+        }
+
+        function createSampleCollectionHierarchy() {
+            return [
+                {
+                    name: 'California', url: '/california', order: 0, isFolder: true, isClickable: true,
+                    children: [
+                        {
+                            name: 'Los Angeles', url: '/california/los-angeles', order: 0, isFolder: true, isClickable: true,
+                            children: [
+                                { name: 'Downtown Storage', url: '/storage-units/downtown', order: 0, children: [], isFolder: false, isClickable: true }
+                            ]
+                        }
+                    ]
+                }
+            ];
+        }
+
+        function extractUrlFromLinkData(linkData) {
+            if (!linkData) return null;
+            if (typeof linkData === 'string') return linkData;
+            if (typeof linkData === 'object') {
+                const possibleUrlProps = ['url', 'href', 'link', 'page_url', 'target', 'value'];
+                for (const prop of possibleUrlProps) {
+                    if (linkData[prop]) return linkData[prop];
+                }
+                for (const [key, value] of Object.entries(linkData)) {
+                    if (typeof value === 'string' && value.trim() !== '' && value !== 'null') return value;
+                }
             }
             return null;
         }
 
-        function renderPaginationControls() {
-            const totalPages = Math.ceil(filteredColumns.length / facilitiesPerPage);
-            const paginationNumbers = element.querySelector('.pagination-numbers');
-            const prevBtn = element.querySelector('.prev-btn');
-            const nextBtn = element.querySelector('.next-btn');
-            const paginationControls = element.querySelector('.facility-pagination-controls');
-            if (totalPages <= 1) { paginationControls.style.display = 'none'; return; } else { paginationControls.style.display = 'flex'; }
-            const facilityFilter = data.config.facilityFilter || 'Portfolio';
-            const useBrandColors = (facilityFilter === 'Brand' || facilityFilter === 'Custom');
-            const brandColors = useBrandColors ? getBrandColorsForCurrentPage() : null;
-            paginationNumbers.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = 'pagination-number';
-                pageBtn.textContent = i;
-                if (i === currentPage) {
-                    pageBtn.classList.add('active');
-                    if (brandColors && brandColors.primary) { pageBtn.style.setProperty('background-color', brandColors.primary, 'important'); pageBtn.style.setProperty('color', 'white', 'important'); pageBtn.style.setProperty('border-color', brandColors.primary, 'important'); }
-                }
-                pageBtn.addEventListener('click', () => { currentPage = i; renderPage(currentPage); renderPaginationControls(); scrollToTop(); });
-                paginationNumbers.appendChild(pageBtn);
+        function getCustomLinkUrl(linkData) {
+            if (typeof linkData === 'string') return linkData;
+            if (typeof linkData === 'object' && linkData) {
+                return linkData.url || linkData.href || linkData.link || linkData.target || linkData.value || '#';
             }
-            if (brandColors && brandColors.primary) {
-                [prevBtn, nextBtn].forEach(btn => {
-                    btn.style.setProperty('background-color', brandColors.primary, 'important');
-                    btn.style.setProperty('border-color', brandColors.primary, 'important');
-                    btn.style.setProperty('color', 'white', 'important');
-                    btn.setAttribute('data-brand-primary', brandColors.primary);
-                    btn.setAttribute('data-brand-cta', brandColors.cta);
-                });
-            }
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
+            return '#';
         }
 
-        function attachPaginationListeners() {
-            const prevBtn = element.querySelector('.prev-btn');
-            const nextBtn = element.querySelector('.next-btn');
-            prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); renderPaginationControls(); scrollToTop(); } });
-            nextBtn.addEventListener('click', () => { const totalPages = Math.ceil(filteredColumns.length / facilitiesPerPage); if (currentPage < totalPages) { currentPage++; renderPage(currentPage); renderPaginationControls(); scrollToTop(); } });
-            [prevBtn, nextBtn].forEach(btn => {
-                btn.addEventListener('mouseenter', function () { const c = this.getAttribute('data-brand-cta'); if (c && !this.disabled) { this.style.setProperty('background-color', c, 'important'); this.style.setProperty('border-color', c, 'important'); this.style.setProperty('color', 'white', 'important'); } });
-                btn.addEventListener('mouseleave', function () { const c = this.getAttribute('data-brand-primary'); if (c && !this.disabled) { this.style.setProperty('background-color', c, 'important'); this.style.setProperty('border-color', c, 'important'); this.style.setProperty('color', 'white', 'important'); } });
+        async function getSitePages() {
+            try {
+                const headerSelectors = ['header nav', '.header nav', '[data-aid="HEADER_NAV"]', '.site-navigation', '.main-navigation', '.navigation', '.navbar', 'nav[role="navigation"]', '.nav-container:not(.dynamic-navigation-widget .nav-container)', '[class*="navigation"]', '[id*="nav"]'];
+                let siteNav = null;
+                for (const selector of headerSelectors) {
+                    const nav = document.querySelector(selector);
+                    if (nav && nav !== element.closest('.nav-container') && nav.querySelectorAll('a[href], [data-page-id]').length > 0) {
+                        siteNav = nav;
+                        break;
+                    }
+                }
+                if (siteNav) {
+                    return parseNavigationStructure(siteNav);
+                } else {
+                    return [];
+                }
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function parseNavigationStructure(navElement) {
+            const pages = [];
+            const topLevelSelectors = [':scope > ul > li', ':scope > ol > li', ':scope > div > ul > li', ':scope > div > ol > li', ':scope > li'];
+            let topLevelItems = [];
+            for (const selector of topLevelSelectors) {
+                try {
+                    topLevelItems = navElement.querySelectorAll(selector);
+                    if (topLevelItems.length > 0) break;
+                } catch (e) { continue; }
+            }
+            if (topLevelItems.length > 0) {
+                topLevelItems.forEach((item, index) => {
+                    const pageData = parsePageItem(item, index);
+                    if (pageData) pages.push(pageData);
+                });
+            }
+            return pages;
+        }
+
+        function parsePageItem(item, order) {
+            const pageData = { name: '', url: '', order: order, children: [], isFolder: false };
+            const hasSubMenu = item.querySelector(':scope > ul, :scope > ol, :scope > .submenu, :scope > .dropdown, :scope > .sub-menu');
+            const isNavFolder = item.classList.contains('nav-folder') || item.classList.contains('navigation-folder') || item.classList.contains('menu-folder') || item.classList.contains('folder') || item.hasAttribute('data-folder') || hasSubMenu;
+            const directLink = item.querySelector(':scope > a[href], :scope > a[data-page-id], :scope > a[data-href]');
+
+            if (directLink) {
+                pageData.name = getPageName(directLink);
+                pageData.url = getPageUrl(directLink);
+            }
+
+            if (isNavFolder || hasSubMenu) {
+                if (!pageData.name) {
+                    const folderNameElement = item.querySelector(':scope > span:not(.icon):not(.arrow), :scope > div:not(:has(ul)):not(:has(ol)):not(:has(a)), :scope > .folder-name, :scope > .nav-folder-name');
+                    if (folderNameElement) {
+                        pageData.name = folderNameElement.textContent.trim();
+                        pageData.isFolder = true;
+                        if (!pageData.url || pageData.url === '') pageData.url = '#';
+                    }
+                } else {
+                    pageData.isFolder = true;
+                }
+            }
+
+            if (!pageData.name) {
+                let textContent = item.textContent.trim();
+                const childLinks = item.querySelectorAll('a, ul, ol');
+                childLinks.forEach(child => {
+                    const childText = child.textContent.trim();
+                    if (childText) textContent = textContent.replace(childText, '').trim();
+                });
+                if (textContent) {
+                    pageData.name = textContent;
+                    pageData.url = pageData.url || '#';
+                }
+            }
+
+            if (!pageData.name) return null;
+
+            if (hasSubMenu) {
+                const childItems = hasSubMenu.querySelectorAll(':scope > li');
+                childItems.forEach((childItem, childIndex) => {
+                    const childData = parsePageItem(childItem, childIndex);
+                    if (childData) pageData.children.push(childData);
+                });
+            }
+            return pageData;
+        }
+
+        function getPageName(linkElement) {
+            const methods = [
+                () => linkElement.getAttribute('data-page-name'),
+                () => linkElement.getAttribute('title'),
+                () => linkElement.getAttribute('aria-label'),
+                () => {
+                    const textSpan = linkElement.querySelector('span:not(.icon):not(.arrow)');
+                    return textSpan ? textSpan.textContent.trim() : null;
+                },
+                () => {
+                    let text = linkElement.textContent.trim();
+                    const iconElements = linkElement.querySelectorAll('.icon, .arrow, .dropdown-arrow, svg');
+                    iconElements.forEach(icon => {
+                        if (icon.textContent) text = text.replace(icon.textContent, '').trim();
+                    });
+                    return text;
+                }
+            ];
+            for (const method of methods) {
+                const name = method();
+                if (name && name.trim() !== '') return name.trim();
+            }
+            return linkElement.textContent ? linkElement.textContent.trim() : '';
+        }
+
+        function getPageUrl(linkElement) {
+            return linkElement.getAttribute('href') || linkElement.getAttribute('data-page-id') || linkElement.getAttribute('data-href') || '#';
+        }
+
+        function addCollectionSubNavToPage(pages, targetUrl, collectionHierarchy) {
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                if (urlMatches(page.url, targetUrl)) {
+                    page.children = [...collectionHierarchy];
+                    page.isFolder = collectionHierarchy.length > 0;
+                    return true;
+                }
+                if (page.children && page.children.length > 0) {
+                    const found = addCollectionSubNavToPage(page.children, targetUrl, collectionHierarchy);
+                    if (found) return true;
+                }
+            }
+            return false;
+        }
+
+        function urlMatches(pageUrl, targetUrl) {
+            if (!pageUrl || !targetUrl) return false;
+            if (pageUrl === targetUrl) return true;
+            const normalize = (url) => url.toString().toLowerCase().replace(/^https?:\/\/[^\/]+/, '').replace(/\/$/, '').replace(/^\//, '');
+            const normalizedPage = normalize(pageUrl);
+            const normalizedTarget = normalize(targetUrl);
+            if (normalizedPage === normalizedTarget) return true;
+            if (normalizedPage.includes(normalizedTarget) || normalizedTarget.includes(normalizedPage)) return true;
+            return false;
+        }
+
+        function buildCollectionHierarchy(collectionItems) {
+            const hierarchy = {};
+            let urlPrefix = data.config['facilityUrlPrefix'] || 'storage-units';
+            urlPrefix = urlPrefix.replace(/^\/+|\/+$/g, '');
+            let statePrepend = data.config['statePrepend'] || '';
+            let cityPrepend = data.config['cityPrepend'] || '';
+            statePrepend = statePrepend.replace(/^\/+|\/+$/g, '');
+            cityPrepend = cityPrepend.replace(/^\/+|\/+$/g, '');
+
+            collectionItems.forEach((item, index) => {
+                const itemData = item.data;
+                const facilityName = itemData['M.fac-name'] || itemData['facility-name'];
+                const facilityState = itemData['M.state'] || itemData['facility-state'];
+                const facilityCity = itemData['M.city'] || itemData['facility-city'];
+                const stateLink = itemData['M.state-link'] || itemData['state-link'] || '';
+                const cityLink = itemData['M.city-link'] || itemData['city-link'] || '';
+                const pageItemUrl = item.page_item_url;
+
+                if (!facilityName || facilityName.trim() === '') return;
+
+                let facilityUrl = '#';
+                if (pageItemUrl) facilityUrl = `/${urlPrefix}/${pageItemUrl}`;
+
+                const isStateClickable = stateLink.toLowerCase() === 'yes';
+                const isCityClickable = cityLink.toLowerCase() === 'yes';
+                const facilityKey = `${facilityName}-${index}`;
+
+                if (facilityState && facilityState.trim() !== '' && facilityCity && facilityCity.trim() !== '') {
+                    if (!hierarchy[facilityState]) {
+                        const stateSlug = sanitizeUrlSegment(facilityState);
+                        let stateUrl = '#';
+                        if (isStateClickable) stateUrl = statePrepend ? `/${statePrepend}/${stateSlug}` : `/${stateSlug}`;
+                        hierarchy[facilityState] = { name: facilityState, url: stateUrl, children: {}, order: Object.keys(hierarchy).length, isFolder: true, isClickable: isStateClickable };
+                    }
+                    if (!hierarchy[facilityState].children[facilityCity]) {
+                        const stateSlug = sanitizeUrlSegment(facilityState);
+                        const citySlug = sanitizeUrlSegment(facilityCity);
+                        let cityUrl = '#';
+                        if (isCityClickable) {
+                            if (cityPrepend) cityUrl = `/${cityPrepend}/${stateSlug}/${citySlug}`;
+                            else if (statePrepend) cityUrl = `/${statePrepend}/${stateSlug}/${citySlug}`;
+                            else cityUrl = `/${stateSlug}/${citySlug}`;
+                        }
+                        hierarchy[facilityState].children[facilityCity] = { name: facilityCity, url: cityUrl, children: {}, order: Object.keys(hierarchy[facilityState].children).length, isFolder: true, isClickable: isCityClickable };
+                    }
+                    hierarchy[facilityState].children[facilityCity].children[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy[facilityState].children[facilityCity].children).length, isFolder: false, isClickable: true };
+                } else if (facilityState && facilityState.trim() !== '') {
+                    if (!hierarchy[facilityState]) {
+                        const stateSlug = sanitizeUrlSegment(facilityState);
+                        let stateUrl = '#';
+                        if (isStateClickable) stateUrl = statePrepend ? `/${statePrepend}/${stateSlug}` : `/${stateSlug}`;
+                        hierarchy[facilityState] = { name: facilityState, url: stateUrl, children: {}, order: Object.keys(hierarchy).length, isFolder: true, isClickable: isStateClickable };
+                    }
+                    hierarchy[facilityState].children[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy[facilityState].children).length, isFolder: false, isClickable: true };
+                } else if (facilityCity && facilityCity.trim() !== '' && (!facilityState || facilityState.trim() === '')) {
+                    if (!hierarchy[facilityCity]) {
+                        const citySlug = sanitizeUrlSegment(facilityCity);
+                        let cityUrl = '#';
+                        if (isCityClickable) cityUrl = cityPrepend ? `/${cityPrepend}/${citySlug}` : `/${citySlug}`;
+                        hierarchy[facilityCity] = { name: facilityCity, url: cityUrl, children: {}, order: Object.keys(hierarchy).length, isFolder: true, isClickable: isCityClickable };
+                    }
+                    hierarchy[facilityCity].children[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy[facilityCity].children).length, isFolder: false, isClickable: true };
+                } else {
+                    hierarchy[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy).length, isFolder: false, isClickable: true };
+                }
+            });
+            return convertHierarchyToArray(hierarchy);
+        }
+
+        function convertHierarchyToArray(hierarchy) {
+            const result = [];
+            Object.values(hierarchy).forEach(item => {
+                const navItem = { name: item.name, url: item.url, order: item.order, children: [], isFolder: item.children && Object.keys(item.children).length > 0, isClickable: item.isClickable !== false };
+                if (item.children && Object.keys(item.children).length > 0) navItem.children = convertHierarchyToArray(item.children);
+                result.push(navItem);
+            });
+            return result.sort((a, b) => a.order - b.order);
+        }
+
+        function renderNavigationStructure(container, pages) {
+            pages.forEach(page => {
+                if (page && page.name) {
+                    const navItem = createNavigationItem(page);
+                    container.appendChild(navItem);
+                }
             });
         }
 
-        function getCurrentPageSlug() {
-            const currentPath = window.location.pathname;
-            const pathParts = currentPath.split('/').filter(part => part.length > 0);
-            if (pathParts.length > 0) {
-                const pageItemUrl = pathParts[pathParts.length - 1];
-                if (pageItemUrl.includes('_')) { const urlParts = pageItemUrl.split('_'); return urlParts.slice(1).join('_'); }
-                else { return pageItemUrl; }
+        function createNavigationItem(page, depth = 0) {
+            const li = document.createElement('li');
+            li.className = 'nav-item';
+            li.setAttribute('data-depth', depth);
+            if (depth === 0) li.classList.add('nav-main-item');
+            const hasChildren = page.children && page.children.length > 0;
+            if (hasChildren) li.classList.add('has-dropdown');
+
+            const link = document.createElement('a');
+            link.className = 'nav-link';
+            link.textContent = page.name;
+            const isClickable = page.isClickable !== false && page.url && page.url !== '#';
+            if (isClickable) link.href = page.url;
+            else { link.href = '#'; link.addEventListener('click', (e) => e.preventDefault()); }
+            li.appendChild(link);
+
+            if (hasChildren) {
+                const arrow = document.createElement('span');
+                arrow.className = 'dropdown-arrow';
+                arrow.innerHTML = '<svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                link.appendChild(arrow);
             }
-            const metaSlug = document.querySelector('meta[name="page-slug"]');
-            if (metaSlug) return metaSlug.getAttribute('content');
-            return null;
-        }
 
-        function getCurrentPageItemUrl() {
-            const currentPath = window.location.pathname;
-            const pathParts = currentPath.split('/').filter(part => part.length > 0);
-            if (pathParts.length > 0) return pathParts[pathParts.length - 1];
-            return '';
-        }
+            if (hasChildren) {
+                const dropdown = document.createElement('ul');
+                dropdown.className = 'nav-dropdown';
+                dropdown.setAttribute('data-dropdown-depth', depth);
+                const scrollInner = document.createElement('div');
+                scrollInner.className = 'nav-dropdown-scroll-inner';
 
-        function getNearbyFacilitiesDebugInfo(facilityInfo) {
-            const facData = facilityInfo.data;
-            return ['M.nearby-01', 'M.nearby-02', 'M.nearby-03'].map(f => facData[f]).filter(v => v && v.trim() !== '');
-        }
+                page.children.forEach(child => {
+                    const childItem = createNavigationItem(child, depth + 1);
+                    scrollInner.appendChild(childItem);
+                });
+                dropdown.appendChild(scrollInner);
+                li.appendChild(dropdown);
 
-        function createColumnElement(facilityInfo, index, columnData) {
-            const columnDiv = document.createElement('div');
-            columnDiv.className = 'facility-column';
-            const facData = facilityInfo.data;
-            const isDebugMode = data.config.enableDebug || false;
-            const facilityFilter = data.config.facilityFilter || 'Portfolio';
-            const useBrandColors = (facilityFilter === 'Brand' || facilityFilter === 'Custom');
-            let facilityUrl = facilityInfo.page_item_url || '#';
-            if (data.config.urlAppend && data.config.urlAppend.trim() !== '') {
-                const urlAppend = data.config.urlAppend.trim().replace(/^\/+|\/+$/g, '');
-                facilityUrl = `/${urlAppend}/${facilityInfo.page_item_url}`;
+                li.addEventListener('mouseenter', () => {
+                    if (window.innerWidth > 767) {
+                        dropdown.style.display = 'block';
+                        li.classList.add('dropdown-open');
+                        setTimeout(() => { positionDropdown(dropdown, li); dropdown.classList.add('show'); }, 10);
+                    }
+                });
+
+                li.addEventListener('mouseleave', () => {
+                    if (window.innerWidth > 767) {
+                        dropdown.classList.remove('show');
+                        setTimeout(() => {
+                            dropdown.style.display = 'none';
+                            li.classList.remove('dropdown-open');
+                            if (dropdown._positionUpdater) { clearInterval(dropdown._positionUpdater); delete dropdown._positionUpdater; }
+                        }, 200);
+                    }
+                });
+
+                link.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 767) {
+                        e.preventDefault();
+                        const isOpen = li.classList.contains('dropdown-open');
+                        const allDropdowns = element.querySelectorAll('.has-dropdown.dropdown-open');
+                        allDropdowns.forEach(item => {
+                            if (item !== li) {
+                                item.classList.remove('dropdown-open');
+                                const otherDropdown = item.querySelector('.nav-dropdown');
+                                if (otherDropdown) otherDropdown.style.display = 'none';
+                            }
+                        });
+                        if (isOpen) {
+                            li.classList.remove('dropdown-open');
+                            dropdown.style.display = 'none';
+                        } else {
+                            li.classList.add('dropdown-open');
+                            dropdown.style.display = 'block';
+                        }
+                    }
+                });
             }
-            const phoneButtonText = data.config.phoneButtonText && data.config.phoneButtonText.trim() !== '' ? data.config.phoneButtonText : (facData['M.fac-phone'] || 'Call Now');
-            let debugInfoHTML = '';
-            if (isDebugMode) {
-                const nearbyFacilities = getNearbyFacilitiesDebugInfo(facilityInfo);
-                const nearbyHTML = nearbyFacilities.length > 0 ? nearbyFacilities.join(', ') : 'None';
-                const currentSlug = facData['M.slug'];
-                const sourceField = additionalFacilitySourceMap[currentSlug];
-                debugInfoHTML = `<div class="facility-debug-info"><div class="debug-item"><strong>M.slug:</strong> ${currentSlug || 'N/A'}</div><div class="debug-item"><strong>Nearby:</strong> ${nearbyHTML}</div><div class="debug-item"><strong>Additional Source:</strong> ${sourceField || 'None'}</div></div>`;
+            return li;
+        }
+
+        function positionDropdown(dropdown, parentItem) {
+            const viewportHeight = window.innerHeight;
+            const parentRect = parentItem.getBoundingClientRect();
+            const isMainNavDropdown = parentItem.classList.contains('nav-main-item');
+
+            dropdown.style.position = ''; dropdown.style.left = ''; dropdown.style.right = ''; dropdown.style.top = ''; dropdown.style.bottom = '';
+
+            if (isMainNavDropdown) {
+                dropdown.style.position = 'absolute';
+                dropdown.style.top = '100%';
+                const availableHeight = viewportHeight - parentRect.bottom;
+                const scrollInner = dropdown.querySelector('.nav-dropdown-scroll-inner');
+                if (scrollInner) scrollInner.style.maxHeight = Math.min(400, availableHeight - 20) + 'px';
+
+                const dropdownWidth = dropdown.offsetWidth;
+                const dropdownRight = parentRect.left + dropdownWidth;
+                if (dropdownRight > window.innerWidth - 20) { dropdown.style.right = '0px'; dropdown.style.left = 'auto'; }
+                else { dropdown.style.left = '0px'; dropdown.style.right = 'auto'; }
+            } else {
+                dropdown.style.position = 'fixed';
+                dropdown.style.zIndex = '10000';
+
+                const computedStyle = getComputedStyle(element.querySelector('.nav-main-list'));
+                const offsetStr = computedStyle.getPropertyValue('--dropdown-offset').trim();
+                const offset = parseFloat(offsetStr) || 5;
+
+                const updatePosition = () => {
+                    const currentRect = parentItem.getBoundingClientRect();
+                    dropdown.style.top = currentRect.top + 'px';
+                    dropdown.style.left = (currentRect.right + offset) + 'px';
+                    const availableHeight = viewportHeight - currentRect.top - 20;
+                    const scrollInner = dropdown.querySelector('.nav-dropdown-scroll-inner');
+                    if (scrollInner) scrollInner.style.maxHeight = Math.min(400, availableHeight) + 'px';
+                };
+
+                updatePosition();
+                if (dropdown._positionUpdater) clearInterval(dropdown._positionUpdater);
+                dropdown._positionUpdater = setInterval(updatePosition, 16);
             }
-            columnDiv.innerHTML = `
-        <div class="facility-image-container"><img src="${facData['M.fac-img01'] || 'https://placehold.co/300x200'}" alt="${facData['M.fac-name'] || 'Facility Image'}" class="facility-image"></div>
-        <div class="facility-content">
-          <h3 class="facility-name">${facData['M.fac-name'] || 'Facility Name'}</h3>
-          <p class="facility-address">${facData['M.fac-address'] || 'Facility Address'}</p>
-          ${debugInfoHTML}
-          <div class="facility-buttons">
-            <a href="${facilityUrl}" class="facility-link-button">${data.config.linkButtonText || 'View Details'}</a>
-            <a href="tel:${facData['M.fac-phone'] || ''}" class="facility-phone-button">${phoneButtonText}</a>
-          </div>
-        </div>`;
-            if (useBrandColors) {
-                const cp = facData['M.c-primary'] || '', cc = facData['M.c-cta'] || '', cl = facData['M.c-light'] || '', cd = facData['M.c-dark'] || '';
-                if (cl) columnDiv.style.setProperty('background-color', cl, 'important');
-                const fn = columnDiv.querySelector('.facility-name'); if (fn && cp) fn.style.setProperty('color', cp, 'important');
-                const fi = columnDiv.querySelector('.facility-image'); if (fi && cd) fi.style.setProperty('border-color', cd, 'important');
-                const lb = columnDiv.querySelector('.facility-link-button');
-                if (lb && cc) {
-                    lb.style.setProperty('background-color', cc, 'important'); lb.style.setProperty('border-color', cc, 'important'); lb.style.setProperty('color', 'white', 'important');
-                    lb.setAttribute('data-hover-bg', cp); lb.setAttribute('data-hover-border', cp); lb.setAttribute('data-normal-bg', cc); lb.setAttribute('data-normal-border', cc);
-                    lb.addEventListener('mouseenter', function () { this.style.setProperty('background-color', this.getAttribute('data-hover-bg'), 'important'); this.style.setProperty('border-color', this.getAttribute('data-hover-border'), 'important'); this.style.setProperty('color', 'white', 'important'); });
-                    lb.addEventListener('mouseleave', function () { this.style.setProperty('background-color', this.getAttribute('data-normal-bg'), 'important'); this.style.setProperty('border-color', this.getAttribute('data-normal-border'), 'important'); this.style.setProperty('color', 'white', 'important'); });
-                }
-                const pb = columnDiv.querySelector('.facility-phone-button');
-                if (pb) {
-                    if (cl) pb.style.setProperty('background-color', cl, 'important');
-                    if (cp) { pb.style.setProperty('border-color', cp, 'important'); pb.style.setProperty('color', cp, 'important'); }
-                    if (cc) { pb.setAttribute('data-hover-bg', cc); pb.setAttribute('data-hover-border', cc); }
-                    pb.setAttribute('data-normal-bg', cl || 'transparent'); pb.setAttribute('data-normal-border', cp); pb.setAttribute('data-normal-color', cp);
-                    pb.addEventListener('mouseenter', function () { this.style.setProperty('background-color', this.getAttribute('data-hover-bg'), 'important'); this.style.setProperty('border-color', this.getAttribute('data-hover-border'), 'important'); this.style.setProperty('color', 'white', 'important'); });
-                    pb.addEventListener('mouseleave', function () { this.style.setProperty('background-color', this.getAttribute('data-normal-bg'), 'important'); this.style.setProperty('border-color', this.getAttribute('data-normal-border'), 'important'); this.style.setProperty('color', this.getAttribute('data-normal-color'), 'important'); });
-                }
-                columnDiv.classList.add('use-brand-colors');
-            }
-            return columnDiv;
         }
 
-        function showSampleData() {
-            filteredColumns = Array.from({ length: 25 }, (_, i) => ({ slug: `sample-${i + 1}`, type: 'sample' }));
-            allFacilityData = Array.from({ length: 25 }, (_, i) => ({ data: { 'M.slug': `sample-${i + 1}`, 'M.fac-name': `Sample Facility ${i + 1}`, 'M.fac-address': '123 Sample Street, Sample City, ST 12345', 'M.fac-img01': 'https://placehold.co/300x200', 'M.fac-phone': '555-123-4567' }, page_item_url: `sample-${i + 1}` }));
-            facilitiesPerPage = parseInt(data.config.facilitiesPerPage) || 10;
-            currentPage = 1;
-            renderPage(currentPage); renderPaginationControls(); attachPaginationListeners();
+        function renderFallbackNavigation() {
+            console.error('[MS Widgets] Rendering fallback navigation');
         }
 
-        function applyDynamicCSS() {
-            var style = document.createElement('style');
-            var css = '';
-            if (data.config.gapBetweenColumns !== undefined) css += `.widget-c31e05 .facility-columns-container { gap: ${data.config.gapBetweenColumns}px !important; }`;
-            if (data.config.columnPadding !== undefined) css += `.widget-c31e05 .facility-content { padding: ${data.config.columnPadding}px !important; }`;
-            if (data.config.columnMargin !== undefined) css += `.widget-c31e05 .facility-column { margin: ${data.config.columnMargin}px !important; }`;
-            if (data.config.columnWidth !== undefined) css += `.widget-c31e05 .facility-column { min-width: ${data.config.columnWidth}px !important; max-width: ${data.config.columnWidth}px !important; flex: 0 1 ${data.config.columnWidth}px !important; }`;
-            if (data.config.columnHeight !== undefined) { const px = data.config.columnHeight * 4; css += `.widget-c31e05 .facility-columns-container.stacked-vertically .facility-column { min-height: ${px}px !important; } @media (max-width: 767px) { .widget-c31e05 .facility-column { min-height: ${px}px !important; } }`; }
-            if (data.config.buttonGap !== undefined) css += `.widget-c31e05 .facility-buttons { gap: ${data.config.buttonGap}px !important; }`;
-            if (data.config.buttonAlignment !== undefined) css += `.widget-c31e05 .facility-buttons { align-items: ${data.config.buttonAlignment} !important; }`;
-            style.textContent = css;
-            const existing = element.querySelector('.dynamic-css-style'); if (existing) existing.remove();
-            style.className = 'dynamic-css-style'; element.appendChild(style);
-        }
-
-        function applyHoverEffects() {
-            var style = document.createElement('style'); var css = '';
-            if (data.config.enableColumnHover) css += `.widget-c31e05 .facility-column:not(.use-brand-colors):hover { transform: translateY(-5px) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }`;
-            if (data.config.enableImageHover) css += `.widget-c31e05 .facility-image:hover { transform: scale(1.05) !important; }`;
-            style.textContent = css;
-            const existing = element.querySelector('.hover-effects-style'); if (existing) existing.remove();
-            style.className = 'hover-effects-style'; element.appendChild(style);
-        }
-
-        initFacilityWidget();
     }
 
     function clean(container) {
