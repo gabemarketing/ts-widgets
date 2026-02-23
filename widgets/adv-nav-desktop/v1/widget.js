@@ -107,7 +107,7 @@
 
         async function initFacilityWidget() {
             try {
-                const collection = await dmAPI.loadCollectionsAPI();
+                const collection = await window.dmAPI.loadCollectionsAPI();
                 facilitiesPerPage = parseInt(data.config.facilitiesPerPage) || 10;
                 allFacilityData = await fetchAllFacilities(collection, data.config.collectionName || 'facilities');
 
