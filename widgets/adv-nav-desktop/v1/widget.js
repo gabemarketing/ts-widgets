@@ -12,10 +12,11 @@
   z-index: 1000;
 }
 .ms-nav-desktop .nav-main-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
   align-items: center;
   justify-content: var(--nav-justify, var(--nav-alignment, flex-start));
   background: transparent;
@@ -40,12 +41,12 @@
   padding-right: var(--nav-item-padding, 16px);
 }
 .ms-nav-desktop .nav-link {
-  display: flex;
+  display: flex !important;
   align-items: center;
   padding-top: var(--nav-text-spacing, 12px);
   padding-bottom: var(--nav-text-spacing, 12px);
   color: var(--nav-text-color, #000000);
-  text-decoration: none;
+  text-decoration: none !important;
   font-size: var(--nav-font-size, 14px);
   font-weight: var(--nav-font-weight, 500);
   transition: all 0.3s ease;
@@ -175,7 +176,7 @@
   flex: none;
   padding: 0 !important;
   margin: 0 !important;
-  list-style: none;
+  list-style: none !important;
 }
 .ms-nav-desktop .nav-dropdown-scroll-inner > .nav-item:last-child {
   border-bottom: none;
@@ -269,7 +270,9 @@
         var style = document.createElement("style");
         style.id = "ms-css-" + WIDGET_ID;
         style.textContent = WIDGET_CSS;
-        document.head.appendChild(style);
+        // Inject into body so our CSS comes after Duda's site CSS in the cascade,
+        // ensuring we win for equal-specificity rules without needing !important everywhere.
+        (document.body || document.head).appendChild(style);
     }
 
     async function init(container, props) {
