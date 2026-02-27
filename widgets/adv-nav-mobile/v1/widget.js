@@ -97,16 +97,17 @@
   transform: rotate(180deg);
 }
 .ms-nav-mobile .nav-item.open > .nav-submenu {
-  max-height: 2000px;
-  opacity: 1;
+  max-height: 2000px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
 }
 .ms-nav-mobile .nav-submenu {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all 0.3s ease;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
 }
 .ms-nav-mobile .nav-submenu .nav-item {
   border-bottom: 1px solid var(--nav-border-color, #eeeeee);
