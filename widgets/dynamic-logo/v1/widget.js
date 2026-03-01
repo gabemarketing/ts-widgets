@@ -284,7 +284,7 @@
                 const bd = brandDataMap.get(lastSegmentSlug);
                 clearTimeout(fallbackTimeout);
                 if (bd && bd.brandLogo) {
-                    showLogo(bd.brandLogo, bd.brandLogoAlt || null, null);
+                    showLogo(bd.brandLogo, bd.brandLogoAlt || null, resolveLink(bd.brandLogoLink) || null);
                 } else {
                     showLogo();
                 }
