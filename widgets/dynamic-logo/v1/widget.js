@@ -70,7 +70,17 @@
         // Read config values passed from the Duda widget panel
         var defaultLogoUrl = config.defaultLogoUrl || '';
         var defaultLogoAlt = config.defaultLogoAlt || '';
-        var logoLinkHref = config.logoLink || '#';
+        // Duda link content fields return an object like { href: "...", target: "_blank" }
+        // resolveLink() extracts the plain URL string from whatever Duda gives us.
+        function resolveLink(val) {
+            if (!val) return '';
+            if (typeof val === 'string') return val;
+            if (typeof val === 'object') return val.href || val.url || val.link || '';
+            return '';
+        }
+
+        var logoLinkHref = resolveLink(config.logoLink) || '#';
+        var logoLinkTarget = (config.logoLink && config.logoLink.target) ? config.logoLink.target : '_self';
         var collectionName = config.collectionName || '';
         var exclusionStrings = config.exclusionStrings || '';
 
@@ -78,7 +88,7 @@
         // This prevents the default logo from downloading and flashing on brand pages
         container.innerHTML = `
 <div class="dynamic-logo-container">
-  <a href="${logoLinkHref}" target="_self">
+  <a href="${logoLinkHref}" target="${logoLinkTarget}">
     <img
       alt="${defaultLogoAlt}"
       class="dynamic-logo-image"
@@ -312,7 +322,7 @@
             if (matchedItem) {
                 const brandLogo = matchedItem['M.brand-logo-img'];
                 const brandLogoAlt = matchedItem['M.brand-logo-img-alt'];
-                const brandLogoLink = matchedItem['M.brand-logo-link'];
+                const brandLogoLink = resolveLink(matchedItem['M.brand-logo-link']);
                 if (brandLogo) {
                     showLogo(brandLogo, brandLogoAlt || null, brandLogoLink || null);
                 } else {
