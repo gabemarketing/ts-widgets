@@ -340,8 +340,24 @@
             return [];
         }
 
+        function collapseSubmenu(submenu) {
+            submenu.style.maxHeight = '0';
+            submenu.style.overflow = 'hidden';
+            submenu.style.opacity = '0';
+        }
+
+        function expandSubmenu(submenu) {
+            submenu.style.maxHeight = '2000px';
+            submenu.style.overflow = 'visible';
+            submenu.style.opacity = '1';
+        }
+
         function closeAllChildDropdowns(parentElement) {
-            parentElement.querySelectorAll('.nav-item.open').forEach(item => item.classList.remove('open'));
+            parentElement.querySelectorAll('.nav-item.open').forEach(item => {
+                item.classList.remove('open');
+                const sub = item.querySelector(':scope > .nav-submenu');
+                if (sub) collapseSubmenu(sub);
+            });
         }
 
         function createNavItem(page, level = 0, isCollectionItem = false) {
@@ -374,6 +390,8 @@
 
                 const submenu = document.createElement('div');
                 submenu.className = 'nav-submenu';
+                // Start collapsed via inline style — immune to site CSS cascade
+                submenu.style.cssText = 'max-height:0;overflow:hidden;opacity:0;display:flex;flex-direction:column;transition:max-height 0.3s ease,opacity 0.3s ease;';
                 page.children.forEach(child => submenu.appendChild(createNavItem(child, level + 1, isCollectionItem)));
 
                 item.appendChild(itemContent);
@@ -383,14 +401,26 @@
                     e.preventDefault();
                     e.stopPropagation();
                     const wasOpen = item.classList.contains('open');
+                    // Close sibling dropdowns
                     const parent = item.parentElement;
                     if (parent) {
                         parent.querySelectorAll(':scope > .nav-item.open').forEach(sib => {
-                            if (sib !== item) { sib.classList.remove('open'); closeAllChildDropdowns(sib); }
+                            if (sib !== item) {
+                                sib.classList.remove('open');
+                                const sibSub = sib.querySelector(':scope > .nav-submenu');
+                                if (sibSub) collapseSubmenu(sibSub);
+                                closeAllChildDropdowns(sib);
+                            }
                         });
                     }
-                    if (wasOpen) { item.classList.remove('open'); closeAllChildDropdowns(item); }
-                    else { item.classList.add('open'); }
+                    if (wasOpen) {
+                        item.classList.remove('open');
+                        collapseSubmenu(submenu);
+                        closeAllChildDropdowns(item);
+                    } else {
+                        item.classList.add('open');
+                        expandSubmenu(submenu);
+                    }
                 });
             } else {
                 item.appendChild(itemContent);
