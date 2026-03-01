@@ -5,14 +5,26 @@
  * LIVE URL: https://widgets.marketing.storage/_shared/license-check.js
  *
  * HOW IT WORKS:
- * Every widget loads this file first, then calls:
+ * Every widget wrapper loads this file first, then calls:
  *   window.MSLicenseCheck("adv-nav-desktop")
  *
- * It automatically reads:
- *   - The current site domain (from browser)
- *   - The Duda site ID (from Duda's editor API, for editor preview)
- * Then asks the Cloudflare Worker: "is this combo licensed for this widget?"
- * Returns: true (show widget) or false (show "Inactive license")
+ * It reads:
+ *   - The current site domain (from browser, for live sites)
+ *   - The Duda site ID (from the editor URL, for editor preview)
+ * Then asks the Cloudflare Worker: "is this site licensed for this widget?"
+ *
+ * RETURN VALUE:
+ *   { ok: true, widgetUrl: "/widgets/.../v1/widget.js" }  — licensed
+ *   false                                                  — not licensed / error
+ *
+ * The widgetUrl tells the wrapper exactly which version file to load.
+ * It is resolved server-side based on the client's version channel:
+ *   stable → current production version (auto-updates when you release)
+ *   beta   → preview version
+ *   locked → frozen to the URL captured at lock time (never updates)
+ *
+ * widget.js files can treat the return value as truthy/falsy for their
+ * own license gate — { ok: true, ... } is truthy, false is falsy.
  */
 
 (function () {
@@ -45,7 +57,9 @@
             var res = await fetch(LICENSE_API + "?" + params.toString());
             if (!res.ok) return false;
             var data = await res.json();
-            return data.ok === true;
+            if (!data.ok) return false;
+            // Return the full result object — wrappers use widgetUrl, widget.js treats it as truthy
+            return data;
         } catch (_) {
             return false;
         }
