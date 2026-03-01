@@ -124,10 +124,15 @@
 
         // showLogo — sets the final src/alt/href and reveals ONLY after the image has loaded.
         // Called with no args → shows default logo. Called with brand args → shows brand logo.
-        // This prevents any flash: the image is invisible until the correct logo is fully loaded.
+        // `revealed` guard: if fallback fires first, a brand logo call can still replace it.
+        let revealed = false;
         const showLogo = (overrideSrc, overrideAlt, overrideHref) => {
             const finalSrc = overrideSrc || defaultLogoUrl;
             const finalAlt = overrideAlt || defaultLogoAlt;
+
+            // If already showing default (via fallback) and this is also default, skip.
+            if (revealed && !overrideSrc) return;
+            revealed = true;
 
             if (overrideAlt) logoImage.alt = finalAlt;
             if (overrideHref && logoLink) logoLink.href = overrideHref;
@@ -136,12 +141,13 @@
 
             if (finalSrc) {
                 logoImage.onload = reveal;
-                logoImage.onerror = reveal; // show even if the image fails
+                logoImage.onerror = reveal;
                 logoImage.src = finalSrc;
             } else {
                 reveal();
             }
         };
+
 
         // ── URL analysis ──────────────────────────────────────────────────
 
@@ -175,8 +181,10 @@
             return;
         }
 
-        // Fallback timeout — show default if collection lookup takes too long
-        const fallbackTimeout = setTimeout(() => showLogo(), 2000);
+        // Fallback: if the collection API is completely unresponsive, show default after 6s.
+        // 6s gives plenty of time for license check + widget load + collection API on slow connections.
+        // This only fires in truly broken scenarios — normal loads complete in < 2s.
+        const fallbackTimeout = setTimeout(() => showLogo(), 6000);
 
         try {
             const collectionAPI = await dmAPI.loadCollectionsAPI();
