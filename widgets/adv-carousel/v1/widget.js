@@ -55,7 +55,8 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
-  transition: background 0.2s ease;
+  opacity: 0;
+  transition: background 0.2s ease, opacity 0.2s ease;
   padding: 0;
 }
 
@@ -238,7 +239,7 @@
                 const prevBtn = container.querySelector('.carousel-prev');
                 const nextBtn = container.querySelector('.carousel-next');
 
-                // Apply vertical position based on content config
+                // Apply vertical position then reveal — prevents flash at wrong position
                 [prevBtn, nextBtn].forEach(function (btn) {
                     if (!btn) return;
                     if (controlPosition === 'bottom') {
@@ -250,6 +251,7 @@
                         btn.style.bottom = 'auto';
                         btn.style.transform = 'translateY(-50%)';
                     }
+                    btn.style.opacity = '1';
                 });
 
                 if (prevBtn) prevBtn.addEventListener('click', function () { goPrev(); resetAuto(); });
