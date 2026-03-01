@@ -1,6 +1,6 @@
 (function () {
 
-    const WIDGET_ID = 'adv-img-carousel';
+    const WIDGET_ID = 'adv-carousel';
 
     const WIDGET_CSS = `
 .ms-img-carousel {
@@ -121,7 +121,6 @@
 
         container.classList.add('ms-img-carousel');
 
-        // Render wrapper — controls only injected if enabled
         container.innerHTML = `
 <div class="carousel-wrapper">
   <div class="carousel-track"></div>
@@ -196,7 +195,6 @@
                 return;
             }
 
-            // Build all image elements upfront
             available.forEach((field, idx) => {
                 const img = document.createElement('img');
                 img.src = item[field.img];
@@ -207,7 +205,7 @@
                 carouselTrack.appendChild(img);
             });
 
-            if (available.length <= 1) return; // Single image — nothing more to do
+            if (available.length <= 1) return;
 
             const images = carouselTrack.querySelectorAll('.carousel-image');
             let currentIndex = 0;
@@ -235,7 +233,6 @@
 
             startAuto();
 
-            // Wire up arrow controls if enabled
             if (displayControls) {
                 const prevBtn = container.querySelector('.carousel-prev');
                 const nextBtn = container.querySelector('.carousel-next');
@@ -248,8 +245,6 @@
             carouselTrack.innerHTML = '<p class="error-message">Error loading images from collection.</p>';
         }
     }
-
-    // ── Register widget ───────────────────────────────────────────────────────
 
     window.MSWidgets = window.MSWidgets || {};
     window.MSWidgets[WIDGET_ID] = { init };
