@@ -48,8 +48,8 @@
   -webkit-backdrop-filter: blur(2px);
   border: none;
   border-radius: 6px;
-  width: 44px;
-  height: 64px;
+  width: 36px;
+  height: 48px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -83,8 +83,8 @@
 }
 `;
 
-    const PREV_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
-    const NEXT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+    const PREV_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+    const NEXT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
 
     function injectCSS() {
         if (document.getElementById('ms-css-' + WIDGET_ID)) return;
@@ -118,6 +118,7 @@
         var selectionMode = config.selectionMode || 'current';
         var specificSlug = config.specificSlug || '';
         var displayControls = config.displayControls === true || config.displayControls === 'true';
+        var controlPosition = (config.controlPosition || 'middle').toLowerCase();
 
         container.classList.add('ms-img-carousel');
 
@@ -236,6 +237,21 @@
             if (displayControls) {
                 const prevBtn = container.querySelector('.carousel-prev');
                 const nextBtn = container.querySelector('.carousel-next');
+
+                // Apply vertical position based on content config
+                [prevBtn, nextBtn].forEach(function (btn) {
+                    if (!btn) return;
+                    if (controlPosition === 'bottom') {
+                        btn.style.top = 'auto';
+                        btn.style.bottom = '16px';
+                        btn.style.transform = 'none';
+                    } else {
+                        btn.style.top = '50%';
+                        btn.style.bottom = 'auto';
+                        btn.style.transform = 'translateY(-50%)';
+                    }
+                });
+
                 if (prevBtn) prevBtn.addEventListener('click', function () { goPrev(); resetAuto(); });
                 if (nextBtn) nextBtn.addEventListener('click', function () { goNext(); resetAuto(); });
             }
