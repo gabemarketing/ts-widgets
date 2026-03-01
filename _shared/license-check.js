@@ -30,9 +30,33 @@
 (function () {
     if (window.MSLicenseCheck) return;
 
-    window.MSLicenseCheck = async function (widgetName) {
-        var LICENSE_API = "https://widgets.marketing.storage/license";
+    var LICENSE_API = "https://widgets.marketing.storage/license";
+    var CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes — matches Worker edge cache
+    var CACHE_PREFIX = "ms_lic_";
 
+    function getCached(key) {
+        try {
+            var raw = sessionStorage.getItem(CACHE_PREFIX + key);
+            if (!raw) return null;
+            var entry = JSON.parse(raw);
+            if (Date.now() > entry.expires) {
+                sessionStorage.removeItem(CACHE_PREFIX + key);
+                return null;
+            }
+            return entry.data;
+        } catch (_) { return null; }
+    }
+
+    function setCached(key, data) {
+        try {
+            sessionStorage.setItem(CACHE_PREFIX + key, JSON.stringify({
+                data: data,
+                expires: Date.now() + CACHE_TTL_MS
+            }));
+        } catch (_) { /* ignore if sessionStorage is unavailable */ }
+    }
+
+    window.MSLicenseCheck = async function (widgetName) {
         var hostname = window.location.hostname.toLowerCase();
         var isEditor = (hostname === "my.duda.co");
 
@@ -48,6 +72,13 @@
 
         if (!site && !siteid) return false;
 
+        // Check sessionStorage first (skip in editor so previews always reflect live state)
+        var cacheKey = (site || siteid) + "_" + (widgetName || "");
+        if (!isEditor) {
+            var cached = getCached(cacheKey);
+            if (cached) return cached;
+        }
+
         var params = new URLSearchParams();
         if (site) params.set("site", site);
         if (siteid) params.set("siteid", siteid);
@@ -58,7 +89,8 @@
             if (!res.ok) return false;
             var data = await res.json();
             if (!data.ok) return false;
-            // Return the full result object — wrappers use widgetUrl, widget.js treats it as truthy
+            // Only cache positive results — revocations (ok:false) take effect on next page load
+            if (!isEditor) setCached(cacheKey, data);
             return data;
         } catch (_) {
             return false;
