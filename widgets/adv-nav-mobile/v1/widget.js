@@ -182,12 +182,14 @@
 
         var data = (props && props.dudaData) ? props.dudaData : { config: {} };
 
+        // Add our scoping class directly to the container element.
+        // The HTML template root (div.dynamic-nav-widget) IS the container,
+        // so we must NOT inject another wrapper div — just set the class and build inside.
+        container.classList.add('ms-nav-mobile');
         container.innerHTML = `
-<div class="dynamic-nav-widget ms-nav-mobile">
-  <nav class="nav-container" role="navigation">
-    <div class="nav-loading">Loading navigation...</div>
-  </nav>
-</div>`;
+<nav class="nav-container" role="navigation">
+  <div class="nav-loading">Loading navigation...</div>
+</nav>`;
 
         const navContainer = container.querySelector('.nav-container');
         const loadingEl = container.querySelector('.nav-loading');
@@ -321,14 +323,14 @@
             const headerSelectors = [
                 'header nav', '.header nav', '[data-aid="HEADER_NAV"]', '.site-navigation',
                 '.main-navigation', '.navigation', '.navbar', 'nav[role="navigation"]',
-                '.nav-container:not(.dynamic-nav-widget .nav-container)',
+                '.nav-container:not(.ms-nav-mobile .nav-container)',
                 '[class*="navigation"]', '[id*="nav"]'
             ];
             for (const selector of headerSelectors) {
                 try {
                     const navElements = document.querySelectorAll(selector);
                     for (const nav of navElements) {
-                        if (nav.closest('.dynamic-nav-widget')) continue;
+                        if (nav.closest('.ms-nav-mobile')) continue;  // skip our own widget
                         if (nav.querySelector('a[href], [data-page-id]')) {
                             return parseNavigationStructure(nav);
                         }
