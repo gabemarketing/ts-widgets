@@ -3,7 +3,14 @@
     const WIDGET_ID = 'dynamic-logo';
 
     const WIDGET_CSS = `
+.ms-dynamic-logo {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .ms-dynamic-logo .dynamic-logo-container {
+  height: 100%;
   width: 100%;
   display: flex;
   align-items: center;
@@ -11,14 +18,16 @@
 }
 
 .ms-dynamic-logo .dynamic-logo-container a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
   text-decoration: none;
 }
 
 .ms-dynamic-logo .dynamic-logo-image {
   max-width: 100%;
-  height: auto;
-  max-height: 70px;
+  width: auto;
+  height: 100%;
   object-fit: contain;
   display: block;
   opacity: 0;
@@ -27,18 +36,6 @@
 
 .ms-dynamic-logo .dynamic-logo-image.logo-visible {
   opacity: 1;
-}
-
-@media (max-width: 767px) {
-  .ms-dynamic-logo .dynamic-logo-image {
-    max-height: 50px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .ms-dynamic-logo .dynamic-logo-image {
-    max-height: 70px;
-  }
 }
 `;
 
@@ -77,12 +74,12 @@
         var collectionName = config.collectionName || '';
         var exclusionStrings = config.exclusionStrings || '';
 
-        // Render the base HTML (mirrors the Duda HTML tab)
+        // Render WITHOUT src — we set it only after we know which logo to show
+        // This prevents the default logo from downloading and flashing on brand pages
         container.innerHTML = `
 <div class="dynamic-logo-container">
   <a href="${logoLinkHref}" target="_self">
     <img
-      src="${defaultLogoUrl}"
       alt="${defaultLogoAlt}"
       class="dynamic-logo-image"
       data-default-src="${defaultLogoUrl}"
@@ -97,6 +94,21 @@
 
         if (!logoImage) return;
 
+        // Apply max-height: use config value if set, otherwise read the container height
+        // This makes the logo automatically fill whatever height Duda's Size control sets
+        var configuredHeight = config.logoMaxHeight || '';
+        if (configuredHeight) {
+            // Config provides an explicit override (e.g. "120px")
+            logoImage.style.maxHeight = configuredHeight;
+        } else {
+            // Fall back to the widget container's rendered height
+            var containerHeight = container.clientHeight || container.offsetHeight;
+            if (containerHeight > 0) {
+                logoImage.style.maxHeight = containerHeight + 'px';
+            }
+            // If container height is 0 (not yet laid out), CSS height:100% handles it
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────
 
         const toSlug = (text) => {
@@ -110,8 +122,25 @@
                 .replace(/^-|-$/g, '');
         };
 
-        const showLogo = () => {
-            logoImage.classList.add('logo-visible');
+        // showLogo — sets the final src/alt/href and reveals ONLY after the image has loaded.
+        // Called with no args → shows default logo. Called with brand args → shows brand logo.
+        // This prevents any flash: the image is invisible until the correct logo is fully loaded.
+        const showLogo = (overrideSrc, overrideAlt, overrideHref) => {
+            const finalSrc = overrideSrc || defaultLogoUrl;
+            const finalAlt = overrideAlt || defaultLogoAlt;
+
+            if (overrideAlt) logoImage.alt = finalAlt;
+            if (overrideHref && logoLink) logoLink.href = overrideHref;
+
+            const reveal = () => logoImage.classList.add('logo-visible');
+
+            if (finalSrc) {
+                logoImage.onload = reveal;
+                logoImage.onerror = reveal; // show even if the image fails
+                logoImage.src = finalSrc;
+            } else {
+                reveal();
+            }
         };
 
         // ── URL analysis ──────────────────────────────────────────────────
@@ -235,13 +264,12 @@
 
             if (brandUrlParams.has(lastSegmentSlug)) {
                 const bd = brandDataMap.get(lastSegmentSlug);
-                if (bd && bd.brandLogo) {
-                    logoImage.src = bd.brandLogo;
-                    if (bd.brandLogoAlt) logoImage.alt = bd.brandLogoAlt;
-                    // Brand pages keep the default link (no logoLink.href update)
-                }
                 clearTimeout(fallbackTimeout);
-                showLogo();
+                if (bd && bd.brandLogo) {
+                    showLogo(bd.brandLogo, bd.brandLogoAlt || null, null);
+                } else {
+                    showLogo();
+                }
                 return;
             }
 
@@ -272,20 +300,19 @@
                 }
             }
 
+            clearTimeout(fallbackTimeout);
             if (matchedItem) {
                 const brandLogo = matchedItem['M.brand-logo-img'];
                 const brandLogoAlt = matchedItem['M.brand-logo-img-alt'];
                 const brandLogoLink = matchedItem['M.brand-logo-link'];
-
                 if (brandLogo) {
-                    logoImage.src = brandLogo;
-                    if (brandLogoAlt) logoImage.alt = brandLogoAlt;
-                    if (logoLink && brandLogoLink) logoLink.href = brandLogoLink;
+                    showLogo(brandLogo, brandLogoAlt || null, brandLogoLink || null);
+                } else {
+                    showLogo();
                 }
+            } else {
+                showLogo();
             }
-
-            clearTimeout(fallbackTimeout);
-            showLogo();
 
         } catch (error) {
             console.error('[Dynamic Logo] Error:', error);
