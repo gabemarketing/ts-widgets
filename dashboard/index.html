@@ -621,7 +621,7 @@
 
     // The Cloudflare Worker URL that manages KV reads/writes
     // This is a separate "admin" endpoint — NOT the same as the license-check Worker
-    const ADMIN_API = "https://ms-license-admin.marketing.storage";
+    const ADMIN_API = "https://widgets.marketing.storage";
 
     // All 9 widget names and their display labels
     const WIDGETS = [
@@ -677,7 +677,9 @@
     // ── LOAD CLIENT LIST ──────────────────────────────────────────────────────────
     async function loadClients() {
       try {
-        const res = await fetch(`${ADMIN_API}/admin/clients`);
+        const res = await fetch(`${ADMIN_API}/admin/clients`, {
+          headers: { "X-Admin-Password": ADMIN_PASSWORD }
+        });
         clients = await res.json();
       } catch {
         // Fallback: demo data so the dashboard works before Worker is wired up
@@ -820,7 +822,7 @@
       try {
         await fetch(`${ADMIN_API}/admin/client`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Admin-Password": ADMIN_PASSWORD },
           body: JSON.stringify(clientData)
         });
       } catch {
@@ -845,7 +847,7 @@
       try {
         await fetch(`${ADMIN_API}/admin/client`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Admin-Password": ADMIN_PASSWORD },
           body: JSON.stringify(client)
         });
       } catch { }
