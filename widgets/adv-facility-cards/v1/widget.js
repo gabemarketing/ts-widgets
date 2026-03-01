@@ -262,7 +262,7 @@
         var data = (props && props.dudaData) ? props.dudaData : { config: {} };
 
         // Add scoping class to blank container div (HTML tab: <div id="ms-widget-root"></div>)
-        container.classList.add('ms-fac-cards');
+        container.classList.add('ms-facility-cards');
 
         // Compute layout classes from config (replaces Duda Handlebars template conditionals)
         const stackingClass = data.config.stackingDirection === 'column' ? 'stacked-vertically' : 'stacked-horizontally';
@@ -739,22 +739,22 @@
             const c = data.config;
 
             if (c.gapBetweenColumns !== undefined)
-                css += `.ms-fac-cards .facility-columns-container { gap: ${c.gapBetweenColumns}px !important; }`;
+                css += `.ms-facility-cards .facility-columns-container { gap: ${c.gapBetweenColumns}px !important; }`;
             if (c.columnPadding !== undefined)
-                css += `.ms-fac-cards .facility-content { padding: ${c.columnPadding}px !important; }`;
+                css += `.ms-facility-cards .facility-content { padding: ${c.columnPadding}px !important; }`;
             if (c.columnMargin !== undefined)
-                css += `.ms-fac-cards .facility-column { margin: ${c.columnMargin}px !important; }`;
+                css += `.ms-facility-cards .facility-column { margin: ${c.columnMargin}px !important; }`;
             if (c.columnWidth !== undefined)
-                css += `.ms-fac-cards .facility-column { min-width: ${c.columnWidth}px !important; max-width: ${c.columnWidth}px !important; flex: 0 1 ${c.columnWidth}px !important; }`;
+                css += `.ms-facility-cards .facility-column { min-width: ${c.columnWidth}px !important; max-width: ${c.columnWidth}px !important; flex: 0 1 ${c.columnWidth}px !important; }`;
             if (c.columnHeight !== undefined) {
                 const h = c.columnHeight * 4;
-                css += `.ms-fac-cards .facility-columns-container.stacked-vertically .facility-column { min-height: ${h}px !important; }`;
-                css += `@media (max-width: 767px) { .ms-fac-cards .facility-column { min-height: ${h}px !important; } }`;
+                css += `.ms-facility-cards .facility-columns-container.stacked-vertically .facility-column { min-height: ${h}px !important; }`;
+                css += `@media (max-width: 767px) { .ms-facility-cards .facility-column { min-height: ${h}px !important; } }`;
             }
             if (c.buttonGap !== undefined)
-                css += `.ms-fac-cards .facility-buttons { gap: ${c.buttonGap}px !important; }`;
+                css += `.ms-facility-cards .facility-buttons { gap: ${c.buttonGap}px !important; }`;
             if (c.buttonAlignment !== undefined)
-                css += `.ms-fac-cards .facility-buttons { align-items: ${c.buttonAlignment} !important; }`;
+                css += `.ms-facility-cards .facility-buttons { align-items: ${c.buttonAlignment} !important; }`;
 
             const existing = container.querySelector('.dynamic-css-style');
             if (existing) existing.remove();
@@ -767,9 +767,9 @@
         function applyHoverEffects() {
             let css = '';
             if (data.config.enableColumnHover)
-                css += `.ms-fac-cards .facility-column:not(.use-brand-colors):hover { transform: translateY(-5px) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }`;
+                css += `.ms-facility-cards .facility-column:not(.use-brand-colors):hover { transform: translateY(-5px) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }`;
             if (data.config.enableImageHover)
-                css += `.ms-fac-cards .facility-image:hover { transform: scale(1.05) !important; }`;
+                css += `.ms-facility-cards .facility-image:hover { transform: scale(1.05) !important; }`;
 
             const existing = container.querySelector('.hover-effects-style');
             if (existing) existing.remove();
