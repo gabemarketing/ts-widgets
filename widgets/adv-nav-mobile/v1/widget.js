@@ -182,9 +182,8 @@
 
         var data = (props && props.dudaData) ? props.dudaData : { config: {} };
 
-        // Add our scoping class directly to the container element.
-        // The HTML template root (div.dynamic-nav-widget) IS the container,
-        // so we must NOT inject another wrapper div — just set the class and build inside.
+        // Add our scoping class to the blank container div (HTML tab: <div id="ms-widget-root"></div>)
+        // then build the nav directly inside it — same pattern as adv-nav-desktop.
         container.classList.add('ms-nav-mobile');
         container.innerHTML = `
 <nav class="nav-container" role="navigation">
