@@ -241,7 +241,7 @@
                 const mCity = item.data['M.city'];
                 if (mCity && typeof mCity === 'string') citySet.add(toSlug(mCity));
 
-                const pageItemUrl = item.data['page_item_url'];
+                const pageItemUrl = item.page_item_url;
                 if (pageItemUrl && typeof pageItemUrl === 'string') {
                     const urlParts = pageItemUrl.split('/').filter(p => p.length > 0);
                     // Brand param is at index 2 (state/city/brand-param/facility-slug)
@@ -284,7 +284,7 @@
                 const bd = brandDataMap.get(lastSegmentSlug);
                 clearTimeout(fallbackTimeout);
                 if (bd && bd.brandLogo) {
-                    showLogo(bd.brandLogo, bd.brandLogoAlt || null, resolveLink(bd.brandLogoLink) || null);
+                    showLogo(bd.brandLogo, bd.brandLogoAlt || null, null); // brand page → keep default link
                 } else {
                     showLogo();
                 }
@@ -297,7 +297,7 @@
 
             for (let item of allItems) {
                 const mSlug = item.data['M.slug'];
-                const pageItemUrl = item.data['page_item_url'];
+                const pageItemUrl = item.page_item_url;
                 const brandLogo = item.data['M.brand-logo-img'];
 
                 if (!brandLogo) continue;
