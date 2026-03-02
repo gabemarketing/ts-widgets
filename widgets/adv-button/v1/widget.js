@@ -116,7 +116,7 @@
         var fontSize = config.buttonFontSize || '16px';
         var openInNewTab = config.openInNewTab === true || config.openInNewTab === 'true';
         var collectionName = config.collectionName || '';
-        var exclusionStrings = config.exclusionStrings || '';
+        var exclusionStrings = config.exclusionTerms || config.exclusionStrings || '';
         // linkCollectionField: which collection field drives the button href on brand/facility pages.
         // Common values: 'M.brand-pay-link' (Pay/Reserve) · 'M.brand-logo-link' (Brand site)
         var linkCollectionField = config.linkCollectionField || 'M.brand-pay-link';
