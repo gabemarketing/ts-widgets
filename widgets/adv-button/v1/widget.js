@@ -115,6 +115,7 @@
         var fontWeight = config.buttonFontWeight || '600';
         var fontSize = config.buttonFontSize || '16px';
         var openInNewTab = config.openInNewTab === true || config.openInNewTab === 'true';
+        var buttonStyle = (config.buttonStyle || 'primary').toLowerCase(); // 'primary' | 'secondary'
         var collectionName = config.collectionName || '';
         var exclusionStrings = config.exclusionTerms || config.exclusionStrings || '';
         // linkCollectionField: which collection field drives the button href on brand/facility pages.
@@ -139,14 +140,41 @@
 
         if (!button || !linkElement) return;
 
-        // ── Apply default colors (secondary color scheme) ─────────────────
-        // Primary → text & border   Light → background   CTA → hover bg/border
-        button.style.setProperty('--btn-color', defaultPrimary);
-        button.style.setProperty('--btn-border-color', defaultPrimary);
-        button.style.setProperty('--btn-bg-color', defaultLight);
-        button.style.setProperty('--btn-hover-bg-color', defaultCta);
-        button.style.setProperty('--btn-hover-border-color', defaultCta);
-        button.style.setProperty('--btn-hover-color', defaultLight);
+        // ── Color helper — maps Primary/CTA/Light to CSS vars per button style ──
+        // Primary style: CTA → bg/border  |  Light → font + hover font  |  Primary → hover bg/border
+        // Secondary style: Primary → font/border  |  Light → bg + hover font  |  CTA → hover bg/border
+        function applyColors(primary, cta, light) {
+            if (buttonStyle === 'primary') {
+                if (cta) {
+                    button.style.setProperty('--btn-bg-color', cta);
+                    button.style.setProperty('--btn-border-color', cta);
+                }
+                if (light) {
+                    button.style.setProperty('--btn-color', light);
+                    button.style.setProperty('--btn-hover-color', light);
+                }
+                if (primary) {
+                    button.style.setProperty('--btn-hover-bg-color', primary);
+                    button.style.setProperty('--btn-hover-border-color', primary);
+                }
+            } else {
+                if (primary) {
+                    button.style.setProperty('--btn-color', primary);
+                    button.style.setProperty('--btn-border-color', primary);
+                }
+                if (light) {
+                    button.style.setProperty('--btn-bg-color', light);
+                    button.style.setProperty('--btn-hover-color', light);
+                }
+                if (cta) {
+                    button.style.setProperty('--btn-hover-bg-color', cta);
+                    button.style.setProperty('--btn-hover-border-color', cta);
+                }
+            }
+        }
+
+        // Apply defaults
+        applyColors(defaultPrimary, defaultCta, defaultLight);
 
         var reveal = function () { button.classList.add('loaded'); };
 
@@ -248,26 +276,15 @@
             }
 
             if (matchedItem) {
-                var primaryColor = matchedItem.data['M.c-primary'];
-                var lightColor = matchedItem.data['M.c-light'];
-                var ctaColor = matchedItem.data['M.c-cta'];
-                var dynamicLink = matchedItem.data[linkCollectionField];
+                // Override with collection colors (only if the field has a value)
+                applyColors(
+                    matchedItem.data['M.c-primary'] || null,
+                    matchedItem.data['M.c-cta'] || null,
+                    matchedItem.data['M.c-light'] || null
+                );
 
-                if (primaryColor) {
-                    button.style.setProperty('--btn-color', primaryColor);
-                    button.style.setProperty('--btn-border-color', primaryColor);
-                }
-                if (lightColor) {
-                    button.style.setProperty('--btn-bg-color', lightColor);
-                    button.style.setProperty('--btn-hover-color', lightColor);
-                }
-                if (ctaColor) {
-                    button.style.setProperty('--btn-hover-bg-color', ctaColor);
-                    button.style.setProperty('--btn-hover-border-color', ctaColor);
-                }
-                if (dynamicLink) {
-                    linkElement.setAttribute('href', dynamicLink);
-                }
+                var dynamicLink = matchedItem.data[linkCollectionField];
+                if (dynamicLink) linkElement.setAttribute('href', dynamicLink);
             }
 
         } catch (err) {
