@@ -73,7 +73,7 @@
         var css = '';
 
         if (customProps) {
-            css += 'cubby-facility {\n' + customProps + '}\n';
+            css += '.ms-adv-cubby-grid cubby-facility {\n' + customProps + '}\n';
         }
 
         // ── 2. ::part() overrides ──────────────────────────────────────────
@@ -82,7 +82,7 @@
         var showImageVal = (c.showCardImage !== undefined && c.showCardImage !== null) ? c.showCardImage : true;
         var hideImage = showImageVal === false || showImageVal === 'false' || showImageVal === 'no';
         if (hideImage) {
-            css += 'cubby-facility::part(card-image) {\n    display: none;\n}\n';
+            css += '.ms-adv-cubby-grid cubby-facility::part(card-image) {\n    display: none;\n}\n';
         }
 
         // Card title
@@ -90,33 +90,33 @@
         titleDecl += c.cardTitleFontSize ? '    font-size: ' + c.cardTitleFontSize + ';\n' : '';
         titleDecl += c.cardTitleFontWeight ? '    font-weight: ' + c.cardTitleFontWeight + ';\n' : '';
         titleDecl += c.cardTitleColor ? '    color: ' + c.cardTitleColor + ';\n' : '';
-        if (titleDecl) css += 'cubby-facility::part(card-title) {\n' + titleDecl + '}\n';
+        if (titleDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-title) {\n' + titleDecl + '}\n';
 
         // Feature text
         var featureDecl = '';
         featureDecl += c.featureFontSize ? '    font-size: ' + c.featureFontSize + ';\n' : '';
         featureDecl += c.featureColor ? '    color: ' + c.featureColor + ';\n' : '';
-        if (featureDecl) css += 'cubby-facility::part(card-feature) {\n' + featureDecl + '}\n';
+        if (featureDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-feature) {\n' + featureDecl + '}\n';
 
         // Feature icon
         if (c.featureIconColor) {
-            css += 'cubby-facility::part(card-feature-icon) {\n    color: ' + c.featureIconColor + ';\n}\n';
+            css += '.ms-adv-cubby-grid cubby-facility::part(card-feature-icon) {\n    color: ' + c.featureIconColor + ';\n}\n';
         }
 
         // Price amount
         var priceDecl = '';
         priceDecl += c.priceFontSize ? '    font-size: ' + c.priceFontSize + ';\n' : '';
         priceDecl += c.priceColor ? '    color: ' + c.priceColor + ';\n' : '';
-        if (priceDecl) css += 'cubby-facility::part(card-price-amount) {\n' + priceDecl + '}\n';
+        if (priceDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-price-amount) {\n' + priceDecl + '}\n';
 
         // Price period
         if (c.pricePeriodFontSize) {
-            css += 'cubby-facility::part(card-price-period) {\n    font-size: ' + c.pricePeriodFontSize + ';\n}\n';
+            css += '.ms-adv-cubby-grid cubby-facility::part(card-price-period) {\n    font-size: ' + c.pricePeriodFontSize + ';\n}\n';
         }
 
         // Strike-through price
         if (c.strikeColor) {
-            css += 'cubby-facility::part(card-price-strike-amount) {\n    color: ' + c.strikeColor + ';\n}\n';
+            css += '.ms-adv-cubby-grid cubby-facility::part(card-price-strike-amount) {\n    color: ' + c.strikeColor + ';\n}\n';
         }
 
         // Buttons (Reserve / Rent / Waitlist)
@@ -125,7 +125,7 @@
         btnDecl += c.buttonFontWeight ? '    font-weight: ' + c.buttonFontWeight + ';\n' : '';
         btnDecl += c.buttonTextTransform ? '    text-transform: ' + c.buttonTextTransform + ';\n' : '';
         btnDecl += c.buttonPadding ? '    padding: ' + c.buttonPadding + ';\n' : '';
-        if (btnDecl) css += 'cubby-facility::part(card-button) {\n' + btnDecl + '}\n';
+        if (btnDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-button) {\n' + btnDecl + '}\n';
 
         // Promo / alert badge
         var promoDecl = '';
@@ -135,7 +135,7 @@
         promoDecl += c.promoBorderRadius ? '    border-radius: ' + c.promoBorderRadius + ';\n' : '';
         promoDecl += c.promoFontSize ? '    font-size: ' + c.promoFontSize + ';\n' : '';
         promoDecl += c.promoFontWeight ? '    font-weight: ' + c.promoFontWeight + ';\n' : '';
-        if (promoDecl) css += 'cubby-facility::part(card-alert) {\n' + promoDecl + '}\n';
+        if (promoDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-alert) {\n' + promoDecl + '}\n';
 
         // Special callout ::before pill (e.g. "SPECIAL" label before promo text)
         // Duda Toggle returns true/false; also handle 'yes'/'no' strings
@@ -146,7 +146,7 @@
             var calloutBg = c.specialCalloutBg || 'var(--cubby-primary-color, #007bff)';
             var calloutColor = c.specialCalloutColor || '#ffffff';
             css += [
-                'cubby-facility::part(card-alert)::before {',
+                '.ms-adv-cubby-grid cubby-facility::part(card-alert)::before {',
                 "    content: '" + calloutText + "';",
                 '    display: inline-block;',
                 '    background-color: ' + calloutBg + ';',
@@ -167,20 +167,20 @@
         // Tabs bar
         var tabsDecl = '';
         tabsDecl += c.tabBgColor ? '    background-color: ' + c.tabBgColor + ';\n' : '';
-        if (tabsDecl) css += 'cubby-facility::part(tabs) {\n' + tabsDecl + '}\n';
+        if (tabsDecl) css += '.ms-adv-cubby-grid cubby-facility::part(tabs) {\n' + tabsDecl + '}\n';
 
         // Individual tabs
         var tabDecl = '';
         tabDecl += c.tabFontSize ? '    font-size: ' + c.tabFontSize + ';\n' : '';
         tabDecl += c.tabTextTransform ? '    text-transform: ' + c.tabTextTransform + ';\n' : '';
-        if (tabDecl) css += 'cubby-facility::part(tab) {\n' + tabDecl + '}\n';
+        if (tabDecl) css += '.ms-adv-cubby-grid cubby-facility::part(tab) {\n' + tabDecl + '}\n';
 
         // Active tab
         var activeTabDecl = '';
         activeTabDecl += c.tabActiveBg ? '    background-color: ' + c.tabActiveBg + ';\n' : '';
         activeTabDecl += c.tabActiveColor ? '    color: ' + c.tabActiveColor + ';\n' : '';
         if (activeTabDecl) {
-            css += 'cubby-facility::part(tab active-tab) {\n' + activeTabDecl + '}\n';
+            css += '.ms-adv-cubby-grid cubby-facility::part(tab active-tab) {\n' + activeTabDecl + '}\n';
         }
 
         return css;
