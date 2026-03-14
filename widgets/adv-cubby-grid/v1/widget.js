@@ -195,15 +195,22 @@
         var config = data.config || {};
 
         // ── Facility slug ──────────────────────────────────────────────────
-        // On live dynamic pages Duda resolves {{M.component}} before our JS sees it.
-        // In the editor the raw template string is passed — detect and treat as empty
-        // so the widget shows the placeholder instead of collapsing to 0 height.
-        var facilitySlug = (config.facilitySlug || '').trim();
-        var layout = (config.layout || 'list').trim();
+        // Duda does NOT resolve {{...}} collection variables in custom widget content
+        // panel fields before passing them to data.config. Instead, we embed the
+        // variable in the HTML tab as a data attribute — Duda resolves it at render
+        // time. We read that first, then fall back to config.facilitySlug for static
+        // pages where the user types the slug manually.
+        var attrSlug = (container.getAttribute('data-facility') || '').trim();
+        var cfgSlug = (config.facilitySlug || '').trim();
 
-        // Unresolved Duda template variable — show placeholder, don't pass to Cubby
-        var isUnresolved = facilitySlug.startsWith('{{') && facilitySlug.endsWith('}}');
-        if (isUnresolved) facilitySlug = '';
+        // Prefer resolved HTML attribute; discard if still unresolved (editor preview)
+        var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
+        var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
+
+        var facilitySlug = (!isAttrUnresolved && attrSlug) ? attrSlug
+            : (!isCfgUnresolved && cfgSlug) ? cfgSlug
+                : '';
+        var layout = (config.layout || 'list').trim();
 
         // Add scoping class
         container.classList.add('ms-adv-cubby-grid');
