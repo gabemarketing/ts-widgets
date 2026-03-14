@@ -23,6 +23,15 @@
     border-radius: 6px;
     text-align: center;
 }
+.ms-adv-cubby-grid .ms-cubby-error {
+    padding: 24px;
+    color: #c0392b;
+    font-size: 13px;
+    border: 1px dashed #c0392b;
+    border-radius: 6px;
+    text-align: center;
+    background: rgba(192,57,43,.05);
+}
 `;
 
     function injectCSS() {
@@ -245,6 +254,18 @@
         }
 
         renderTarget.innerHTML = '<cubby-facility facility="' + facilitySlug + '" layout="' + layout + '"></cubby-facility>';
+
+        // ── Invalid slug detection ─────────────────────────────────────────
+        // Cubby renders nothing (0 height) when a slug is not found.
+        // After 6 s (generous for API latency), check height and show an error.
+        var cubbyEl = renderTarget.querySelector('cubby-facility');
+        if (cubbyEl) {
+            setTimeout(function () {
+                if (cubbyEl.isConnected && cubbyEl.offsetHeight < 50) {
+                    renderTarget.innerHTML = '<div class="ms-cubby-error">⚠️ Facility not found — invalid slug: <strong>' + facilitySlug + '</strong></div>';
+                }
+            }, 6000);
+        }
     }
 
     window.MSWidgets = window.MSWidgets || {};
