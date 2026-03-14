@@ -195,9 +195,15 @@
         var config = data.config || {};
 
         // ── Facility slug ──────────────────────────────────────────────────
-        // On dynamic pages, Duda resolves {{M.component}} before our JS sees it.
+        // On live dynamic pages Duda resolves {{M.component}} before our JS sees it.
+        // In the editor the raw template string is passed — detect and treat as empty
+        // so the widget shows the placeholder instead of collapsing to 0 height.
         var facilitySlug = (config.facilitySlug || '').trim();
         var layout = (config.layout || 'list').trim();
+
+        // Unresolved Duda template variable — show placeholder, don't pass to Cubby
+        var isUnresolved = facilitySlug.startsWith('{{') && facilitySlug.endsWith('}}');
+        if (isUnresolved) facilitySlug = '';
 
         // Add scoping class
         container.classList.add('ms-adv-cubby-grid');
