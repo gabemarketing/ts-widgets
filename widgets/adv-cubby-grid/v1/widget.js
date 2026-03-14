@@ -207,8 +207,8 @@
         var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
         var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
 
-        var facilitySlug = (!isAttrUnresolved && attrSlug) ? attrSlug
-            : (!isCfgUnresolved && cfgSlug) ? cfgSlug
+        var facilitySlug = (!isCfgUnresolved && cfgSlug) ? cfgSlug
+            : (!isAttrUnresolved && attrSlug) ? attrSlug
                 : '';
         var layout = (config.layout || 'list').trim();
 
