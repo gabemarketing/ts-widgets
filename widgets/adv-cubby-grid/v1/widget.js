@@ -195,25 +195,28 @@
         var config = data.config || {};
 
         // ── Facility slug ──────────────────────────────────────────────────
-        // Duda does NOT resolve {{...}} variables in custom widget content panel
-        // fields. Instead we embed the collection variable in the HTML tab as a
-        // data-facility attribute — Duda resolves it at render time and we read it
-        // from the inner #ms-widget-root element (container is the outer Duda wrapper).
+        // Duda does NOT resolve {{...}} collection variables in custom widget
+        // content panel fields OR HTML tab attributes. Instead we parse the slug
+        // from the URL path — on a live dynamic Duda page the URL ends with the
+        // collection item slug (e.g. .../maine/parsonfield/all-purpose-kezar-falls).
+        // In the Duda builder the URL ends with ~page-item~ which we reject, so
+        // it falls back to config.facilitySlug for builder preview.
         //
         // Priority:
-        //   1. data-facility on #ms-widget-root — live dynamic page (Duda resolved)
-        //   2. config.facilitySlug content panel field — static pages + builder preview
-        var innerEl = container.querySelector('#ms-widget-root') || container;
-        var attrSlug = (innerEl.getAttribute('data-facility') || '').trim();
-        var cfgSlug = (config.facilitySlug || '').trim();
+        //   1. URL last path segment (live dynamic page — most reliable)
+        //   2. config.facilitySlug content panel field (builder preview / static pages)
+        function getUrlSlug() {
+            var segments = window.location.pathname.split('/').filter(Boolean);
+            var last = segments[segments.length - 1] || '';
+            // Accept only valid slugs: lowercase letters, digits, hyphens
+            return /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(last) ? last : '';
+        }
 
-        // Discard if still an unresolved Duda template (editor / static page context)
-        var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
+        var urlSlug = getUrlSlug();
+        var cfgSlug = (config.facilitySlug || '').trim();
         var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
 
-        var facilitySlug = (!isAttrUnresolved && attrSlug) ? attrSlug
-            : (!isCfgUnresolved && cfgSlug) ? cfgSlug
-                : '';
+        var facilitySlug = urlSlug || (!isCfgUnresolved && cfgSlug) || '';
         var layout = (config.layout || 'list').trim();
 
         // Add scoping class
@@ -222,7 +225,7 @@
         // ── Inject Cubby dynamic CSS ───────────────────────────────────────
         var cubbyStyleId = 'ms-css-adv-cubby-grid-dynamic';
         var existingStyle = document.getElementById(cubbyStyleId);
-        if (existingStyle) existingStyle.remove(); // replace on re-init
+        if (existingStyle) existingStyle.remove();
 
         var dynamicCSS = buildCubbyCSS(config);
         if (dynamicCSS) {
@@ -232,13 +235,16 @@
             (document.body || document.head).appendChild(dynStyle);
         }
 
-        // ── Render ─────────────────────────────────────────────────────────
+        // ── Render into #ms-widget-root (keeps Duda's widget handle intact) ─
+        // Replace container.innerHTML only if #ms-widget-root is not found.
+        var renderTarget = container.querySelector('#ms-widget-root') || container;
+
         if (!facilitySlug) {
-            container.innerHTML = '<div class="ms-cubby-placeholder">Tech.Storage — Adv Cubby Unit Grid<br>Set the <strong>Facility Slug</strong> in the widget panel to load the unit grid.</div>';
+            renderTarget.innerHTML = '<div class="ms-cubby-placeholder">Tech.Storage — Adv Cubby Unit Grid<br>Set the <strong>Facility Slug</strong> in the widget panel to preview, or publish to a dynamic page to load automatically.</div>';
             return;
         }
 
-        container.innerHTML = '<cubby-facility facility="' + facilitySlug + '" layout="' + layout + '"></cubby-facility>';
+        renderTarget.innerHTML = '<cubby-facility facility="' + facilitySlug + '" layout="' + layout + '"></cubby-facility>';
     }
 
     window.MSWidgets = window.MSWidgets || {};
