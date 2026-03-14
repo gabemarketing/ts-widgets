@@ -195,20 +195,24 @@
         var config = data.config || {};
 
         // ── Facility slug ──────────────────────────────────────────────────
-        // Duda does NOT resolve {{...}} collection variables in custom widget content
-        // panel fields before passing them to data.config. Instead, we embed the
-        // variable in the HTML tab as a data attribute — Duda resolves it at render
-        // time. We read that first, then fall back to config.facilitySlug for static
-        // pages where the user types the slug manually.
-        var attrSlug = (container.getAttribute('data-facility') || '').trim();
+        // Duda does NOT resolve {{...}} variables in custom widget content panel
+        // fields. Instead we embed the collection variable in the HTML tab as a
+        // data-facility attribute — Duda resolves it at render time and we read it
+        // from the inner #ms-widget-root element (container is the outer Duda wrapper).
+        //
+        // Priority:
+        //   1. data-facility on #ms-widget-root — live dynamic page (Duda resolved)
+        //   2. config.facilitySlug content panel field — static pages + builder preview
+        var innerEl = container.querySelector('#ms-widget-root') || container;
+        var attrSlug = (innerEl.getAttribute('data-facility') || '').trim();
         var cfgSlug = (config.facilitySlug || '').trim();
 
-        // Prefer resolved HTML attribute; discard if still unresolved (editor preview)
+        // Discard if still an unresolved Duda template (editor / static page context)
         var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
         var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
 
-        var facilitySlug = (!isCfgUnresolved && cfgSlug) ? cfgSlug
-            : (!isAttrUnresolved && attrSlug) ? attrSlug
+        var facilitySlug = (!isAttrUnresolved && attrSlug) ? attrSlug
+            : (!isCfgUnresolved && cfgSlug) ? cfgSlug
                 : '';
         var layout = (config.layout || 'list').trim();
 
