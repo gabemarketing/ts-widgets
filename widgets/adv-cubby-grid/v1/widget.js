@@ -206,28 +206,30 @@
         var config = data.config || {};
 
         // ── Facility slug ──────────────────────────────────────────────────
-        // Duda does NOT resolve {{...}} collection variables in custom widget
-        // content panel fields OR HTML tab attributes. Instead we parse the slug
-        // from the URL path — on a live dynamic Duda page the URL ends with the
-        // collection item slug (e.g. .../maine/parsonfield/all-purpose-kezar-falls).
-        // In the Duda builder the URL ends with ~page-item~ which we reject, so
-        // it falls back to config.facilitySlug for builder preview.
+        // Source priority:
+        //   1. config.facilitySlug (content panel) — builder preview & static page override.
+        //      User types a real slug here to preview in editor; on live dynamic pages
+        //      this is left blank and Duda does NOT resolve {{...}} here.
+        //   2. data-facility on #ms-widget-root (HTML tab) — the live-page source.
+        //      Duda DOES resolve {{dynamic_page_collection.M.component}} in the widget
+        //      HTML tab at render time on live dynamic pages, so this becomes M.component
+        //      (the correct Cubby slug — NOT M.slug which is the URL segment).
         //
-        // Priority:
-        //   1. URL last path segment (live dynamic page — most reliable)
-        //   2. config.facilitySlug content panel field (builder preview / static pages)
-        function getUrlSlug() {
-            var segments = window.location.pathname.split('/').filter(Boolean);
-            var last = segments[segments.length - 1] || '';
-            // Accept only valid slugs: lowercase letters, digits, hyphens
-            return /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(last) ? last : '';
-        }
+        // Note: URL path parsing was removed — the URL last segment is M.slug which
+        // can differ from M.component (the Cubby facility identifier).
 
-        var urlSlug = getUrlSlug();
         var cfgSlug = (config.facilitySlug || '').trim();
         var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
+        if (isCfgUnresolved) cfgSlug = '';
 
-        var facilitySlug = urlSlug || (!isCfgUnresolved && cfgSlug) || '';
+        // Read data-facility from the inner #ms-widget-root element (the HTML tab div).
+        // container is the outer Duda wrapper; #ms-widget-root is its child.
+        var innerEl = container.querySelector('[data-facility]') || container.querySelector('#ms-widget-root');
+        var attrSlug = innerEl ? (innerEl.getAttribute('data-facility') || '').trim() : '';
+        var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
+        if (isAttrUnresolved) attrSlug = '';
+
+        var facilitySlug = cfgSlug || attrSlug || '';
         var layout = (config.layout || 'list').trim();
 
         // Add scoping class
