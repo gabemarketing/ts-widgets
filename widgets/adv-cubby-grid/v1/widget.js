@@ -90,6 +90,7 @@
         titleDecl += c.cardTitleFontSize ? '    font-size: ' + c.cardTitleFontSize + ';\n' : '';
         titleDecl += c.cardTitleFontWeight ? '    font-weight: ' + c.cardTitleFontWeight + ';\n' : '';
         titleDecl += c.cardTitleColor ? '    color: ' + c.cardTitleColor + ';\n' : '';
+        titleDecl += c.cardTitleTextAlign ? '    text-align: ' + c.cardTitleTextAlign + ';\n' : '';
         if (titleDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-title) {\n' + titleDecl + '}\n';
 
         // Feature text
@@ -145,6 +146,7 @@
             var calloutText = c.specialCalloutText || 'SPECIAL';
             var calloutBg = c.specialCalloutBg || 'var(--cubby-primary-color, #007bff)';
             var calloutColor = c.specialCalloutColor || '#ffffff';
+            var calloutRadius = c.specialCalloutRadius || '50px';
             css += [
                 '.ms-adv-cubby-grid cubby-facility::part(card-alert)::before {',
                 "    content: '" + calloutText + "';",
@@ -156,7 +158,7 @@
                 '    letter-spacing: 1px;',
                 '    text-transform: uppercase;',
                 '    padding: 4px 10px;',
-                '    border-radius: 50px;',
+                '    border-radius: ' + calloutRadius + ';',
                 '    margin-right: 8px;',
                 '    vertical-align: middle;',
                 '}',
