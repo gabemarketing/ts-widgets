@@ -275,50 +275,59 @@
 
         // ── Facility slug ──────────────────────────────────────────────────
         // Source priority:
-        //   1. config.facilitySlug (content panel) — builder preview & static page override.
-        //      User types a real slug here to preview in editor; on live dynamic pages
-        //      this is left blank and Duda does NOT resolve {{...}} here.
-        //   2. data-facility on #ms-widget-root (HTML tab) — the live-page source.
-        //      Duda DOES resolve {{dynamic_page_collection.M.component}} in the widget
-        //      HTML tab at render time on live dynamic pages, so this becomes M.component
-        //      (the correct Cubby slug — NOT M.slug which is the URL segment).
-        //
-        // Note: URL path parsing was removed — the URL last segment is M.slug which
-        // can differ from M.component (the Cubby facility identifier).
+        //   1. config.facilitySlug (content panel) — use directly for preview/testing.
+        //   2. Collection API lookup — query collection by URL slug, read M.component.
+        //      This is the same pattern used by adv-button, adv-carousel, etc.
 
         var cfgSlug = (config.facilitySlug || '').trim();
-        var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
-        if (isCfgUnresolved) cfgSlug = '';
+        // Strip unresolved Duda handlebars
+        if (cfgSlug.indexOf('{{') === 0 && cfgSlug.indexOf('}}') === cfgSlug.length - 2) cfgSlug = '';
 
-        // Read data-facility from the HTML tab div.
-        // Check both inside the container AND the container itself, because
-        // Duda's element magic global may BE the #ms-widget-root div directly.
-        var innerEl = container.querySelector('[data-facility]');
-        if (!innerEl && container.getAttribute && container.getAttribute('data-facility')) {
-            innerEl = container;
-        }
-        if (!innerEl) {
-            innerEl = container.querySelector('#ms-widget-root') || container;
-        }
-        var attrSlug = innerEl ? (innerEl.getAttribute('data-facility') || '').trim() : '';
-        var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
-        if (isAttrUnresolved) attrSlug = '';
+        var collectionName = (config.collectionName || '').trim();
+        var facilitySlug = cfgSlug;
 
-        // Fallback: read from Duda's dynamic page collection data if available
-        var collectionSlug = '';
-        if (data && data.dynamicPageCollections) {
+        // If no manual slug, look up M.component from the collection via URL slug
+        if (!facilitySlug && collectionName) {
             try {
-                var collections = data.dynamicPageCollections;
-                for (var key in collections) {
-                    if (collections[key] && collections[key]['M.component']) {
-                        collectionSlug = (collections[key]['M.component'] || '').trim();
-                        break;
+                var collectionAPI = await dmAPI.loadCollectionsAPI();
+                var allItems = [];
+                var pageNumber = 0;
+                var hasMore = true;
+
+                while (hasMore) {
+                    var results = await collectionAPI
+                        .data(collectionName)
+                        .pageSize(100)
+                        .pageNumber(pageNumber)
+                        .get();
+
+                    if (results && results.values && results.values.length > 0) {
+                        allItems = allItems.concat(results.values);
+                        hasMore = results.values.length === 100;
+                        pageNumber++;
+                    } else {
+                        hasMore = false;
                     }
                 }
-            } catch (e) { }
-        }
 
-        var facilitySlug = cfgSlug || attrSlug || collectionSlug || '';
+                // Match current page URL slug against M.slug in collection
+                var pathSegments = window.location.pathname.toLowerCase()
+                    .replace(/^\/|\/$/g, '').split('/').filter(function (s) { return s.length > 0; });
+                var urlSlug = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1] : '';
+
+                if (urlSlug) {
+                    for (var i = 0; i < allItems.length; i++) {
+                        var itemSlug = (allItems[i].data['M.slug'] || '').trim().toLowerCase();
+                        if (itemSlug && itemSlug === urlSlug) {
+                            facilitySlug = (allItems[i].data['M.component'] || '').trim();
+                            break;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('[ms-adv-cubby-grid] Collection lookup error:', err);
+            }
+        }
         var layout = (config.layout || 'list').trim();
 
         // Add scoping class
@@ -342,7 +351,7 @@
         var renderTarget = container.querySelector('#ms-widget-root') || container;
 
         if (!facilitySlug) {
-            renderTarget.innerHTML = '<div class="ms-cubby-placeholder">Tech.Storage — Adv Cubby Unit Grid<br>Set the <strong>Facility Slug</strong> in the widget panel to preview, or publish to a dynamic page to load automatically.</div>';
+            renderTarget.innerHTML = '<div class="ms-cubby-placeholder">Tech.Storage — Adv Cubby Unit Grid<br>Set the <strong>Collection Name</strong> (for dynamic pages) or <strong>Facility Slug</strong> (for preview) in the widget panel.</div>';
             return;
         }
 
