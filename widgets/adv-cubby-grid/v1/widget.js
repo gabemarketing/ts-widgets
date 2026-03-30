@@ -138,34 +138,6 @@
         promoDecl += c.promoFontWeight ? '    font-weight: ' + c.promoFontWeight + ';\n' : '';
         if (promoDecl) css += '.ms-adv-cubby-grid cubby-facility::part(card-alert) {\n' + promoDecl + '}\n';
 
-        // Special callout ::before pill (e.g. "SPECIAL" label before promo text)
-        // Duda Toggle returns true/false; also handle 'yes'/'no' strings
-        var calloutVal = (c.showSpecialCallout !== undefined && c.showSpecialCallout !== null) ? c.showSpecialCallout : false;
-        var showCallout = calloutVal === true || calloutVal === 'true' || calloutVal === 'yes';
-        if (showCallout) {
-            var calloutText = c.specialCalloutText || 'SPECIAL';
-            var calloutBg = c.specialCalloutBg || 'var(--cubby-primary-color, #007bff)';
-            var calloutColor = c.specialCalloutColor || '#ffffff';
-            var calloutRadius = c.specialCalloutRadius || '50px';
-            css += [
-                '.ms-adv-cubby-grid cubby-facility::part(card-alert)::before {',
-                "    content: '" + calloutText + "';",
-                '    display: inline-block;',
-                '    background-color: ' + calloutBg + ';',
-                '    color: ' + calloutColor + ';',
-                '    font-size: 10px;',
-                '    font-weight: 700;',
-                '    letter-spacing: 1px;',
-                '    text-transform: uppercase;',
-                '    padding: 4px 10px;',
-                '    border-radius: ' + calloutRadius + ';',
-                '    margin-right: 8px;',
-                '    vertical-align: middle;',
-                '}',
-                ''
-            ].join('\n');
-        }
-
         // Tabs bar
         var tabsDecl = '';
         tabsDecl += c.tabBgColor ? '    background-color: ' + c.tabBgColor + ';\n' : '';
@@ -186,6 +158,102 @@
         }
 
         return css;
+    }
+
+    // ── Inject a single callout pill before each card's promo badges ────
+    // Accesses cubby-facility's Shadow DOM to prepend a styled <span> pill
+    // before the first [part="card-alert"] in each card's alert container.
+    function injectCalloutPills(container, config) {
+        var calloutVal = (config.showSpecialCallout !== undefined && config.showSpecialCallout !== null) ? config.showSpecialCallout : false;
+        var showCallout = calloutVal === true || calloutVal === 'true' || calloutVal === 'yes';
+        if (!showCallout) return;
+
+        var calloutText = config.specialCalloutText || 'SPECIAL';
+        var calloutBg = config.specialCalloutBg || 'var(--cubby-primary-color, #007bff)';
+        var calloutColor = config.specialCalloutColor || '#ffffff';
+        var calloutRadius = config.specialCalloutRadius || '50px';
+        var calloutFontSize = config.specialCalloutFontSize || '10px';
+        var calloutPadding = config.specialCalloutPadding || '4px 10px';
+        var calloutBorder = config.specialCalloutBorder || 'none';
+
+        var cubbyEl = container.querySelector('cubby-facility');
+        if (!cubbyEl) return;
+
+        var pillStyle = [
+            'display: inline-block',
+            'background-color: ' + calloutBg,
+            'color: ' + calloutColor,
+            'font-size: ' + calloutFontSize,
+            'font-weight: 700',
+            'letter-spacing: 1px',
+            'text-transform: uppercase',
+            'padding: ' + calloutPadding,
+            'border-radius: ' + calloutRadius,
+            'border: ' + calloutBorder,
+            'margin-right: 8px',
+            'vertical-align: middle',
+            'line-height: 1'
+        ].join('; ');
+
+        function tryInject() {
+            var shadow = cubbyEl.shadowRoot;
+            if (!shadow) return false;
+
+            var alerts = shadow.querySelectorAll('[part~="card-alert"]');
+            if (!alerts.length) return false;
+
+            var processedParents = [];
+            for (var i = 0; i < alerts.length; i++) {
+                var parent = alerts[i].parentElement;
+                if (!parent || processedParents.indexOf(parent) !== -1) continue;
+                processedParents.push(parent);
+
+                if (parent.querySelector('.ms-callout-pill')) continue;
+
+                var pill = document.createElement('span');
+                pill.className = 'ms-callout-pill';
+                pill.textContent = calloutText;
+                pill.style.cssText = pillStyle;
+                parent.insertBefore(pill, parent.firstChild);
+            }
+
+            return processedParents.length > 0;
+        }
+
+        // Try immediately
+        if (tryInject()) return;
+
+        // Poll every 500ms for up to 6 seconds (Cubby renders async)
+        var attempts = 0;
+        var maxAttempts = 12;
+        var observer = null;
+
+        function poll() {
+            attempts++;
+            if (tryInject()) {
+                if (observer) observer.disconnect();
+                return;
+            }
+            if (attempts < maxAttempts) {
+                setTimeout(poll, 500);
+            } else {
+                if (observer) observer.disconnect();
+                console.warn('[ms-adv-cubby-grid] Could not inject callout pills — Shadow DOM may be closed or no alerts found.');
+            }
+        }
+
+        // If shadow root is open, also observe for faster detection
+        var shadow = cubbyEl.shadowRoot;
+        if (shadow) {
+            observer = new MutationObserver(function () {
+                if (tryInject()) {
+                    observer.disconnect();
+                }
+            });
+            observer.observe(shadow, { childList: true, subtree: true });
+        }
+
+        setTimeout(poll, 500);
     }
 
     async function init(container, props) {
@@ -258,6 +326,9 @@
         }
 
         renderTarget.innerHTML = '<cubby-facility facility="' + facilitySlug + '" layout="' + layout + '"></cubby-facility>';
+
+        // ── Inject single callout pill before each card's promo badges ────
+        injectCalloutPills(renderTarget, config);
 
         // ── Invalid slug detection ─────────────────────────────────────────
         // Cubby renders nothing (0 height) when a slug is not found.
