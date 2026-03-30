@@ -290,14 +290,35 @@
         var isCfgUnresolved = cfgSlug.startsWith('{{') && cfgSlug.endsWith('}}');
         if (isCfgUnresolved) cfgSlug = '';
 
-        // Read data-facility from the inner #ms-widget-root element (the HTML tab div).
-        // container is the outer Duda wrapper; #ms-widget-root is its child.
-        var innerEl = container.querySelector('[data-facility]') || container.querySelector('#ms-widget-root');
+        // Read data-facility from the HTML tab div.
+        // Check both inside the container AND the container itself, because
+        // Duda's element magic global may BE the #ms-widget-root div directly.
+        var innerEl = container.querySelector('[data-facility]');
+        if (!innerEl && container.getAttribute && container.getAttribute('data-facility')) {
+            innerEl = container;
+        }
+        if (!innerEl) {
+            innerEl = container.querySelector('#ms-widget-root') || container;
+        }
         var attrSlug = innerEl ? (innerEl.getAttribute('data-facility') || '').trim() : '';
         var isAttrUnresolved = attrSlug.startsWith('{{') && attrSlug.endsWith('}}');
         if (isAttrUnresolved) attrSlug = '';
 
-        var facilitySlug = cfgSlug || attrSlug || '';
+        // Fallback: read from Duda's dynamic page collection data if available
+        var collectionSlug = '';
+        if (data && data.dynamicPageCollections) {
+            try {
+                var collections = data.dynamicPageCollections;
+                for (var key in collections) {
+                    if (collections[key] && collections[key]['M.component']) {
+                        collectionSlug = (collections[key]['M.component'] || '').trim();
+                        break;
+                    }
+                }
+            } catch (e) { }
+        }
+
+        var facilitySlug = cfgSlug || attrSlug || collectionSlug || '';
         var layout = (config.layout || 'list').trim();
 
         // Add scoping class
