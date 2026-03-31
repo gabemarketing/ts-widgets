@@ -245,7 +245,7 @@
                 if (pageItemUrl && typeof pageItemUrl === 'string') {
                     const urlParts = pageItemUrl.split('/').filter(p => p.length > 0);
                     // Brand param is at index 2 (state/city/brand-param/facility-slug)
-                    if (urlParts.length >= 3) {
+                    if (urlParts.length >= 4) {
                         const brandParam = urlParts[2];
                         if (brandParam) {
                             brandUrlParams.add(brandParam);
