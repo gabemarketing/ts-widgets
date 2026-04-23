@@ -275,6 +275,86 @@
       color: var(--red);
     }
 
+    /* ── Mode toggle + Open-mode banner ────────────────────────────── */
+    .mode-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(168, 85, 247, .22), rgba(168, 85, 247, .08));
+      border: 1px solid rgba(168, 85, 247, .45);
+      color: #e9d5ff;
+      padding: 14px 20px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .mode-banner.show { display: flex; }
+    .mode-banner .msg { line-height: 1.4; }
+    .mode-banner strong { color: #fff; }
+
+    .mode-banner .btn-banner {
+      background: #a855f7;
+      color: #fff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .12s;
+    }
+
+    .mode-banner .btn-banner:hover { opacity: .85; }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      background: #1e2330;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .mode-toggle button {
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background .12s, color .12s;
+    }
+
+    .mode-toggle button:hover:not(.active):not(:disabled) {
+      color: var(--text);
+    }
+
+    .mode-toggle button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    .mode-toggle button.active[data-mode="licensed"] {
+      background: var(--accent);
+      color: #0d0f14;
+    }
+
+    .mode-toggle button.active[data-mode="open"] {
+      background: #a855f7;
+      color: #fff;
+    }
+
     /* ── Widget toggles ────────────────────────────────────────────── */
     .widget-dots {
       display: flex;
@@ -537,9 +617,22 @@
   <!-- ── APP ───────────────────────────────────────────────────────────── -->
   <main id="app-screen">
 
+    <div class="mode-banner" id="mode-banner">
+      <div class="msg">
+        ⚠ <strong>GLOBAL OPEN MODE</strong> — every widget is unlocked on every site. Client licenses are not being enforced.
+      </div>
+      <button class="btn-banner" id="banner-switch-licensed">Switch to Licensed</button>
+    </div>
+
     <div class="top-bar">
       <h1>Clients</h1>
-      <button class="btn btn-primary" id="add-client-btn">+ Add Client</button>
+      <div class="top-bar-right">
+        <div class="mode-toggle" id="mode-toggle" title="Global license mode">
+          <button type="button" data-mode="licensed" class="active">🔒 Licensed</button>
+          <button type="button" data-mode="open">🔓 Open</button>
+        </div>
+        <button class="btn btn-primary" id="add-client-btn">+ Add Client</button>
+      </div>
     </div>
 
     <div class="stats">
@@ -672,6 +765,7 @@
         document.getElementById("app-screen").style.display = "block";
         document.getElementById("logout-btn").style.display = "block";
         loadClients();
+        loadMode();
       } else {
         document.getElementById("login-error").style.display = "block";
         document.getElementById("password-input").value = "";
@@ -707,6 +801,68 @@
       }
       renderTable();
     }
+
+    // ── GLOBAL MODE (Licensed / Open) ─────────────────────────────────────────────
+    let currentMode = "licensed";
+
+    async function loadMode() {
+      try {
+        const res = await fetch(`${ADMIN_API}/admin/mode`, {
+          headers: { "X-Admin-Password": ADMIN_PASSWORD }
+        });
+        const data = await res.json();
+        currentMode = (data && data.mode === "open") ? "open" : "licensed";
+      } catch {
+        currentMode = "licensed";
+      }
+      renderMode();
+    }
+
+    function renderMode() {
+      document.querySelectorAll("#mode-toggle button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === currentMode);
+      });
+      document.getElementById("mode-banner").classList.toggle("show", currentMode === "open");
+    }
+
+    async function setMode(newMode) {
+      if (newMode !== "licensed" && newMode !== "open") return;
+      if (newMode === currentMode) return;
+
+      if (newMode === "open") {
+        const ok = confirm("Turn ON GLOBAL OPEN MODE?\n\nEvery widget will load on every site — your client license list will NOT be enforced.\n\nContinue?");
+        if (!ok) return;
+      }
+
+      const buttons = document.querySelectorAll("#mode-toggle button");
+      buttons.forEach(b => b.disabled = true);
+
+      try {
+        const res = await fetch(`${ADMIN_API}/admin/mode`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Admin-Password": ADMIN_PASSWORD },
+          body: JSON.stringify({ mode: newMode })
+        });
+        const data = await res.json();
+        if (!data || !data.ok) throw new Error(data && data.reason);
+        currentMode = data.mode;
+        renderMode();
+        toast(newMode === "open"
+          ? "Global Open mode enabled — widgets unlocked everywhere"
+          : "Licensed mode enabled — client licenses are enforced");
+      } catch (err) {
+        toast("Could not change mode. Check the worker or your connection.");
+      } finally {
+        buttons.forEach(b => b.disabled = false);
+      }
+    }
+
+    document.getElementById("mode-toggle").addEventListener("click", e => {
+      const btn = e.target.closest("button[data-mode]");
+      if (btn) setMode(btn.dataset.mode);
+    });
+
+    document.getElementById("banner-switch-licensed").addEventListener("click", () => setMode("licensed"));
 
     // ── RENDER TABLE ──────────────────────────────────────────────────────────────
     function renderTable() {
