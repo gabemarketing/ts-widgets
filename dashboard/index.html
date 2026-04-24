@@ -350,9 +350,70 @@
       color: #0d0f14;
     }
 
-    .mode-toggle button.active[data-mode="open"] {
+    .mode-toggle button.active[data-mode="open-stable"] {
       background: #a855f7;
       color: #fff;
+    }
+
+    .mode-toggle button.active[data-mode="open-locked"] {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    /* ── Open-Locked snapshot panel ────────────────────────────────── */
+    .snapshot-panel {
+      background: #1e2330;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .snapshot-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .snapshot-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .snapshot-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .snapshot-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 6px 16px;
+      margin-top: 12px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .snapshot-list .snap-row {
+      display: flex;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .snapshot-list .snap-id {
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .snapshot-list .snap-url {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* ── Widget toggles ────────────────────────────────────────────── */
@@ -618,8 +679,8 @@
   <main id="app-screen">
 
     <div class="mode-banner" id="mode-banner">
-      <div class="msg">
-        ⚠ <strong>GLOBAL OPEN MODE</strong> — every widget is unlocked on every site. Client licenses are not being enforced.
+      <div class="msg" id="mode-banner-msg">
+        ⚠ <strong>GLOBAL OPEN MODE</strong> — non-client sites load widgets. Clients still use their configured settings.
       </div>
       <button class="btn-banner" id="banner-switch-licensed">Switch to Licensed</button>
     </div>
@@ -629,10 +690,22 @@
       <div class="top-bar-right">
         <div class="mode-toggle" id="mode-toggle" title="Global license mode">
           <button type="button" data-mode="licensed" class="active">🔒 Licensed</button>
-          <button type="button" data-mode="open">🔓 Open</button>
+          <button type="button" data-mode="open-stable">🔓 Open · Stable</button>
+          <button type="button" data-mode="open-locked">🔓 Open · Locked</button>
         </div>
         <button class="btn btn-primary" id="add-client-btn">+ Add Client</button>
       </div>
+    </div>
+
+    <div class="snapshot-panel" id="snapshot-panel" style="display:none">
+      <div class="snapshot-head">
+        <div>
+          <div class="snapshot-title">Open-Locked Snapshot</div>
+          <div class="snapshot-sub" id="snapshot-sub">No snapshot taken yet — non-client sites fall back to current stable.</div>
+        </div>
+        <button class="btn btn-primary" id="snapshot-btn">📸 Snapshot Current Versions</button>
+      </div>
+      <div class="snapshot-list" id="snapshot-list"></div>
     </div>
 
     <div class="stats">
@@ -802,16 +875,30 @@
       renderTable();
     }
 
-    // ── GLOBAL MODE (Licensed / Open) ─────────────────────────────────────────────
+    // ── GLOBAL MODE (Licensed / Open-Stable / Open-Locked) ────────────────────────
     let currentMode = "licensed";
+    let openSnapshot = { snapshotAt: null, versions: {} };
+
+    const VALID_MODES = ["licensed", "open-stable", "open-locked"];
+
+    // Legacy "open" → "open-stable"
+    function normalizeMode(m) {
+      if (m === "open") return "open-stable";
+      return VALID_MODES.includes(m) ? m : "licensed";
+    }
 
     async function loadMode() {
       try {
-        const res = await fetch(`${ADMIN_API}/admin/mode`, {
-          headers: { "X-Admin-Password": ADMIN_PASSWORD }
-        });
-        const data = await res.json();
-        currentMode = (data && data.mode === "open") ? "open" : "licensed";
+        const [modeRes, snapRes] = await Promise.all([
+          fetch(`${ADMIN_API}/admin/mode`, { headers: { "X-Admin-Password": ADMIN_PASSWORD } }),
+          fetch(`${ADMIN_API}/admin/open-snapshot`, { headers: { "X-Admin-Password": ADMIN_PASSWORD } })
+        ]);
+        const modeData = await modeRes.json();
+        currentMode = normalizeMode(modeData && modeData.mode);
+        const snapData = await snapRes.json();
+        if (snapData && snapData.ok) {
+          openSnapshot = { snapshotAt: snapData.snapshotAt || null, versions: snapData.versions || {} };
+        }
       } catch {
         currentMode = "licensed";
       }
@@ -822,15 +909,56 @@
       document.querySelectorAll("#mode-toggle button").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.mode === currentMode);
       });
-      document.getElementById("mode-banner").classList.toggle("show", currentMode === "open");
+
+      const banner = document.getElementById("mode-banner");
+      const bannerMsg = document.getElementById("mode-banner-msg");
+      const isOpen = currentMode === "open-stable" || currentMode === "open-locked";
+      banner.classList.toggle("show", isOpen);
+
+      if (currentMode === "open-stable") {
+        bannerMsg.innerHTML = "⚠ <strong>GLOBAL OPEN · STABLE</strong> — non-client sites load the current stable version. Clients still use their configured channel.";
+      } else if (currentMode === "open-locked") {
+        const when = openSnapshot.snapshotAt ? new Date(openSnapshot.snapshotAt).toLocaleString() : "no snapshot yet";
+        bannerMsg.innerHTML = `⚠ <strong>GLOBAL OPEN · LOCKED</strong> — non-client sites load the frozen snapshot (${esc(when)}). Clients still use their configured channel.`;
+      }
+
+      renderSnapshotPanel();
+    }
+
+    function renderSnapshotPanel() {
+      const panel = document.getElementById("snapshot-panel");
+      const show = currentMode === "open-locked";
+      panel.style.display = show ? "block" : "none";
+      if (!show) return;
+
+      const sub = document.getElementById("snapshot-sub");
+      if (openSnapshot.snapshotAt) {
+        sub.textContent = `Last snapshot: ${new Date(openSnapshot.snapshotAt).toLocaleString()}`;
+      } else {
+        sub.textContent = "No snapshot taken yet — non-client sites fall back to current stable.";
+      }
+
+      const list = document.getElementById("snapshot-list");
+      const entries = Object.entries(openSnapshot.versions || {});
+      if (entries.length === 0) {
+        list.innerHTML = "";
+        return;
+      }
+      list.innerHTML = entries.map(([id, url]) =>
+        `<div class="snap-row"><span class="snap-id">${esc(id)}</span><span class="snap-url" title="${esc(url)}">${esc(url)}</span></div>`
+      ).join("");
     }
 
     async function setMode(newMode) {
-      if (newMode !== "licensed" && newMode !== "open") return;
+      if (!VALID_MODES.includes(newMode)) return;
       if (newMode === currentMode) return;
 
-      if (newMode === "open") {
-        const ok = confirm("Turn ON GLOBAL OPEN MODE?\n\nEvery widget will load on every site — your client license list will NOT be enforced.\n\nContinue?");
+      if (newMode === "open-stable") {
+        const ok = confirm("Turn ON GLOBAL OPEN · STABLE?\n\nNon-client sites will load the current stable version of every widget. Clients in the dashboard keep their configured settings.\n\nContinue?");
+        if (!ok) return;
+      }
+      if (newMode === "open-locked") {
+        const ok = confirm("Turn ON GLOBAL OPEN · LOCKED?\n\nNon-client sites will load the frozen snapshot. If no snapshot exists yet they fall back to current stable until you click 'Snapshot Current Versions'. Clients keep their configured settings.\n\nContinue?");
         if (!ok) return;
       }
 
@@ -845,15 +973,42 @@
         });
         const data = await res.json();
         if (!data || !data.ok) throw new Error(data && data.reason);
-        currentMode = data.mode;
+        currentMode = normalizeMode(data.mode);
         renderMode();
-        toast(newMode === "open"
-          ? "Global Open mode enabled — widgets unlocked everywhere"
-          : "Licensed mode enabled — client licenses are enforced");
+        if (newMode === "open-stable") toast("Open · Stable enabled — non-client sites load current stable");
+        else if (newMode === "open-locked") toast("Open · Locked enabled — non-client sites load the frozen snapshot");
+        else toast("Licensed mode enabled — client licenses are enforced");
       } catch (err) {
         toast("Could not change mode. Check the worker or your connection.");
       } finally {
         buttons.forEach(b => b.disabled = false);
+      }
+    }
+
+    async function snapshotVersions() {
+      const ok = confirm("Take a new snapshot?\n\nThis captures every widget's current stable URL and freezes them as the Open · Locked default. Non-client sites will immediately load these URLs.\n\nContinue?");
+      if (!ok) return;
+
+      const btn = document.getElementById("snapshot-btn");
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = "Snapshotting…";
+
+      try {
+        const res = await fetch(`${ADMIN_API}/admin/open-snapshot`, {
+          method: "POST",
+          headers: { "X-Admin-Password": ADMIN_PASSWORD }
+        });
+        const data = await res.json();
+        if (!data || !data.ok) throw new Error(data && data.reason);
+        openSnapshot = { snapshotAt: data.snapshotAt || null, versions: data.versions || {} };
+        renderMode();
+        toast("Snapshot captured — non-client sites now load the frozen URLs");
+      } catch (err) {
+        toast("Could not snapshot versions. Check the worker or your connection.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
     }
 
@@ -863,6 +1018,7 @@
     });
 
     document.getElementById("banner-switch-licensed").addEventListener("click", () => setMode("licensed"));
+    document.getElementById("snapshot-btn").addEventListener("click", snapshotVersions);
 
     // ── RENDER TABLE ──────────────────────────────────────────────────────────────
     function renderTable() {
