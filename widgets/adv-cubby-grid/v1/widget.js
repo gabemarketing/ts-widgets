@@ -174,6 +174,9 @@
             for (var j = 0; j < all.length; j++) {
                 if (all[j].shadowRoot) walk(all[j].shadowRoot);
             }
+            // Also descend into the node's own shadow root — querySelectorAll
+            // never crosses into it, so we'd otherwise miss everything inside.
+            if (node.shadowRoot) walk(node.shadowRoot);
         }
         walk(root);
         return results;
