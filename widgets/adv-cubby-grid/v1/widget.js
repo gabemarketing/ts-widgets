@@ -160,9 +160,29 @@
         return css;
     }
 
+    // ── Deep shadow-DOM query ──────────────────────────────────────────
+    // querySelectorAll does NOT cross shadow-root boundaries. Cubby may
+    // render each card inside a nested custom element with its own shadow
+    // root, so we recursively walk every open shadow root we can reach.
+    function deepQueryAll(root, selector) {
+        var results = [];
+        function walk(node) {
+            if (!node || !node.querySelectorAll) return;
+            var matches = node.querySelectorAll(selector);
+            for (var i = 0; i < matches.length; i++) results.push(matches[i]);
+            var all = node.querySelectorAll('*');
+            for (var j = 0; j < all.length; j++) {
+                if (all[j].shadowRoot) walk(all[j].shadowRoot);
+            }
+        }
+        walk(root);
+        return results;
+    }
+
     // ── Inject a single callout pill before each card's promo badges ────
-    // Accesses cubby-facility's Shadow DOM to prepend a styled <span> pill
-    // before the first [part="card-alert"] in each card's alert container.
+    // Walks cubby-facility's full shadow-DOM tree (including nested shadow
+    // roots) to prepend a styled <span> pill before the first
+    // [part="card-alert"] in each card's alert container.
     function injectCalloutPills(container, config) {
         var calloutVal = (config.showSpecialCallout !== undefined && config.showSpecialCallout !== null) ? config.showSpecialCallout : false;
         var showCallout = calloutVal === true || calloutVal === 'true' || calloutVal === 'yes';
@@ -196,10 +216,7 @@
         ].join('; ');
 
         function tryInject() {
-            var shadow = cubbyEl.shadowRoot;
-            if (!shadow) return false;
-
-            var alerts = shadow.querySelectorAll('[part~="card-alert"]');
+            var alerts = deepQueryAll(cubbyEl, '[part~="card-alert"]');
             if (!alerts.length) return false;
 
             var processedParents = [];
@@ -220,40 +237,83 @@
             return processedParents.length > 0;
         }
 
-        // Try immediately
-        if (tryInject()) return;
-
-        // Poll every 500ms for up to 6 seconds (Cubby renders async)
+        // Poll every 500ms for up to ~10 seconds (Cubby renders async; nested
+        // card shadow roots may attach in a second phase after API data resolves).
         var attempts = 0;
-        var maxAttempts = 12;
-        var observer = null;
+        var maxAttempts = 20;
+        var hasInjectedOnce = false;
+        var observers = [];
+        var debouncePending = false;
+
+        function disconnectAll() {
+            for (var k = 0; k < observers.length; k++) observers[k].disconnect();
+            observers.length = 0;
+        }
+
+        // Coalesce mutation bursts so we don't run a deep traversal per micro-mutation.
+        function scheduleCheck() {
+            if (debouncePending) return;
+            debouncePending = true;
+            setTimeout(function () {
+                debouncePending = false;
+                if (tryInject()) hasInjectedOnce = true;
+                attachToNewShadowRoots(cubbyEl);
+            }, 50);
+        }
+
+        function attachObservers(rootNode) {
+            if (!rootNode) return;
+            var obs = new MutationObserver(scheduleCheck);
+            obs.observe(rootNode, { childList: true, subtree: true });
+            observers.push(obs);
+        }
+
+        // Walk the full tree (light DOM + every reachable open shadow root) and
+        // attach a MutationObserver to each shadow root we haven't seen yet.
+        // The __msObserved flag prevents duplicate observers on the same root.
+        function attachToNewShadowRoots(node) {
+            if (!node) return;
+            function collect(n) {
+                if (!n) return;
+                if (n.shadowRoot && !n.shadowRoot.__msObserved) {
+                    n.shadowRoot.__msObserved = true;
+                    attachObservers(n.shadowRoot);
+                }
+                if (n.shadowRoot) {
+                    var inner = n.shadowRoot.querySelectorAll('*');
+                    for (var i = 0; i < inner.length; i++) collect(inner[i]);
+                }
+                if (n.children) {
+                    for (var j = 0; j < n.children.length; j++) collect(n.children[j]);
+                }
+            }
+            collect(node);
+        }
 
         function poll() {
             attempts++;
-            if (tryInject()) {
-                if (observer) observer.disconnect();
-                return;
-            }
+            if (tryInject()) hasInjectedOnce = true;
+            attachToNewShadowRoots(cubbyEl);
+            // Once we've injected at least once, stop polling. Observers remain
+            // attached so tab switches / re-renders re-pill any new cards
+            // (parent.querySelector('.ms-callout-pill') guards prevent dupes).
+            if (hasInjectedOnce) return;
             if (attempts < maxAttempts) {
                 setTimeout(poll, 500);
             } else {
-                if (observer) observer.disconnect();
-                console.warn('[ms-adv-cubby-grid] Could not inject callout pills — Shadow DOM may be closed or no alerts found.');
+                disconnectAll();
+                console.warn('[ms-adv-cubby-grid] Could not inject callout pills.',
+                    'Has shadowRoot:', !!cubbyEl.shadowRoot,
+                    'Nested elements with shadowRoot:', deepQueryAll(cubbyEl, '*').filter(function (n) { return n.shadowRoot; }).length,
+                    'Found [part~="card-alert"]:', deepQueryAll(cubbyEl, '[part~="card-alert"]').length);
             }
         }
 
-        // If shadow root is open, also observe for faster detection
-        var shadow = cubbyEl.shadowRoot;
-        if (shadow) {
-            observer = new MutationObserver(function () {
-                if (tryInject()) {
-                    observer.disconnect();
-                }
-            });
-            observer.observe(shadow, { childList: true, subtree: true });
-        }
-
-        setTimeout(poll, 500);
+        // Try immediately (covers the rare case where Cubby is already rendered),
+        // attach observers to every current shadow root, then poll for late content.
+        if (tryInject()) hasInjectedOnce = true;
+        attachToNewShadowRoots(cubbyEl);
+        if (!hasInjectedOnce) setTimeout(poll, 500);
     }
 
     async function init(container, props) {
