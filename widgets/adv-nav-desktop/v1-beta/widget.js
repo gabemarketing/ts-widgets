@@ -305,15 +305,13 @@
         var data = props.dudaData || { config: {} };
         var element = container;
 
-        // --- ORIGINAL WIDGET LOGIC ---
-
         try {
             setCSSVariablesImmediately();
             applyDesignSettings();
             await buildCompleteNavigation();
             detectAndMarkCurrentPage();
         } catch (error) {
-            renderFallbackNavigation();
+            console.error('[MS Widgets] adv-nav-desktop init failed', error);
         }
 
         function setCSSVariablesImmediately() {
@@ -326,19 +324,15 @@
 
         function applyDesignSettings() {
             const navList = element.querySelector('.nav-main-list');
-            const alignment = data.config['navAlignment'];
+            const cfg = data.config;
+
+            const alignment = cfg['navAlignment'];
             if (alignment) {
-                let alignmentValue = 'flex-start';
-                switch (alignment) {
-                    case 'center': alignmentValue = 'center'; break;
-                    case 'right': alignmentValue = 'flex-end'; break;
-                    default: alignmentValue = 'flex-start';
-                }
-                navList.style.setProperty('--nav-alignment', alignmentValue);
+                const map = { center: 'center', right: 'flex-end', left: 'flex-start' };
+                navList.style.setProperty('--nav-alignment', map[alignment] || 'flex-start');
             }
 
-            const spreadItems = data.config['spreadItems'];
-            if (spreadItems) {
+            if (cfg['spreadItems']) {
                 navList.classList.add('spread-items');
                 navList.style.setProperty('--nav-justify', 'space-between');
             } else {
@@ -346,74 +340,36 @@
                 navList.style.setProperty('--nav-justify', 'var(--nav-alignment, flex-start)');
             }
 
-            const itemPadding = data.config['itemPadding'];
-            if (itemPadding !== undefined && itemPadding !== null) {
-                navList.style.setProperty('--nav-item-padding', itemPadding + 'px');
-            } else {
-                navList.style.setProperty('--nav-item-padding', '16px');
+            // CSS variables already define matching fallbacks (e.g. var(--x, 16px)),
+            // so only set when the user provided an explicit value.
+            const pxSettings = [
+                ['itemPadding', '--nav-item-padding'],
+                ['textSpacing', '--nav-text-spacing'],
+                ['itemMargin', '--nav-item-margin'],
+                ['dropdownTextSpacing', '--dropdown-text-spacing'],
+                ['dropdownItemPadding', '--dropdown-item-padding'],
+            ];
+            for (const [configKey, cssVar] of pxSettings) {
+                const val = cfg[configKey];
+                if (val != null) navList.style.setProperty(cssVar, val + 'px');
             }
 
-            const textSpacing = data.config['textSpacing'];
-            if (textSpacing !== undefined && textSpacing !== null) {
-                navList.style.setProperty('--nav-text-spacing', textSpacing + 'px');
-            } else {
-                navList.style.setProperty('--nav-text-spacing', '12px');
-            }
-
-            const itemMargin = data.config['itemMargin'];
-            if (itemMargin !== undefined && itemMargin !== null) {
-                navList.style.setProperty('--nav-item-margin', itemMargin + 'px');
-            } else {
-                navList.style.setProperty('--nav-item-margin', '0px');
-            }
-
-            const dropdownOffset = data.config['dropdownOffset'];
-            let offsetValue = '5px';
-            if (dropdownOffset !== undefined && dropdownOffset !== null && dropdownOffset !== '') {
-                let numericOffset = 0;
-                if (typeof dropdownOffset === 'number') {
-                    numericOffset = dropdownOffset;
-                } else if (typeof dropdownOffset === 'string') {
-                    const cleanValue = dropdownOffset.replace(/px$/, '').trim();
-                    numericOffset = parseFloat(cleanValue);
-                } else {
-                    numericOffset = Number(dropdownOffset);
-                }
-                if (!isNaN(numericOffset)) {
-                    offsetValue = numericOffset + 'px';
-                } else {
-                    offsetValue = '5px';
-                }
-            }
-            navList.style.setProperty('--dropdown-offset', offsetValue);
-
-            const dropdownTextSpacing = data.config['dropdownTextSpacing'];
-            if (dropdownTextSpacing !== undefined && dropdownTextSpacing !== null) {
-                navList.style.setProperty('--dropdown-text-spacing', dropdownTextSpacing + 'px');
-            } else {
-                navList.style.setProperty('--dropdown-text-spacing', '12px');
-            }
-
-            const dropdownItemPadding = data.config['dropdownItemPadding'];
-            if (dropdownItemPadding !== undefined && dropdownItemPadding !== null) {
-                navList.style.setProperty('--dropdown-item-padding', dropdownItemPadding + 'px');
-            } else {
-                navList.style.setProperty('--dropdown-item-padding', '20px');
-            }
+            // dropdownOffset has no CSS fallback — must always be set.
+            const rawOffset = cfg['dropdownOffset'];
+            const parsed = parseFloat(String(rawOffset ?? '').replace(/px$/, '').trim());
+            navList.style.setProperty('--dropdown-offset', (isNaN(parsed) ? 5 : parsed) + 'px');
         }
 
         function detectAndMarkCurrentPage() {
             const currentUrl = getCurrentPageUrl();
             const allNavLinks = element.querySelectorAll('.nav-link');
-            const matches = [];
 
             allNavLinks.forEach(link => {
                 link.classList.remove('current-page', 'current-page-parent');
             });
 
-            allNavLinks.forEach((link, index) => {
+            allNavLinks.forEach(link => {
                 const linkUrl = link.getAttribute('href');
-                const linkText = link.textContent.trim();
                 let isMatch = false;
 
                 if (linkUrl && linkUrl !== '#') {
@@ -422,10 +378,8 @@
 
                     if (isHomePage(normalizedCurrentUrl) && isHomePage(normalizedLinkUrl)) {
                         isMatch = true;
-                        matches.push({ text: linkText, url: linkUrl, reason: 'HOME_PAGE_MATCH' });
                     } else if (!isHomePage(normalizedCurrentUrl) && !isHomePage(normalizedLinkUrl) && normalizedLinkUrl === normalizedCurrentUrl) {
                         isMatch = true;
-                        matches.push({ text: linkText, url: linkUrl, reason: 'EXACT_MATCH' });
                     }
                 }
 
@@ -560,14 +514,13 @@
                             addCollectionSubNavToPage(navigationPages, locationsPageUrl, collectionHierarchy);
                         }
                     } catch (error) {
-                        const sampleHierarchy = createSampleCollectionHierarchy();
-                        addCollectionSubNavToPage(navigationPages, locationsPageUrl, sampleHierarchy);
+                        console.warn('[MS Widgets] adv-nav-desktop: collection fetch failed', error);
                     }
                 }
             }
 
             if (navigationPages.length === 0) {
-                navigationPages = createSampleNavigationForPreview();
+                console.warn('[MS Widgets] adv-nav-desktop: no navigation items from any source');
             }
 
             renderNavigationStructure(navContainer, navigationPages);
@@ -602,50 +555,11 @@
                         hasMorePages = false;
                     }
                 } catch (error) {
+                    console.warn('[MS Widgets] adv-nav-desktop: collection page fetch failed', error);
                     hasMorePages = false;
                 }
             }
             return allItems;
-        }
-
-        function createSampleNavigationForPreview() {
-            return [
-                { name: 'Home', url: '/', order: 0, children: [], isFolder: false },
-                {
-                    name: 'Locations', url: '/locations', order: 1, isFolder: true, isClickable: true,
-                    children: [
-                        {
-                            name: 'California', url: '/california', order: 0, isFolder: true, isClickable: true,
-                            children: [
-                                {
-                                    name: 'Los Angeles', url: '/california/los-angeles', order: 0, isFolder: true, isClickable: true,
-                                    children: [
-                                        { name: 'Downtown LA Storage', url: '/storage-units/downtown-la-storage', order: 0, children: [], isFolder: false, isClickable: true },
-                                        { name: 'Hollywood Storage', url: '/storage-units/hollywood-storage', order: 1, children: [], isFolder: false, isClickable: true }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                { name: 'About', url: '/about', order: 2, children: [], isFolder: false }
-            ];
-        }
-
-        function createSampleCollectionHierarchy() {
-            return [
-                {
-                    name: 'California', url: '/california', order: 0, isFolder: true, isClickable: true,
-                    children: [
-                        {
-                            name: 'Los Angeles', url: '/california/los-angeles', order: 0, isFolder: true, isClickable: true,
-                            children: [
-                                { name: 'Downtown Storage', url: '/storage-units/downtown', order: 0, children: [], isFolder: false, isClickable: true }
-                            ]
-                        }
-                    ]
-                }
-            ];
         }
 
         function extractUrlFromLinkData(linkData) {
@@ -688,6 +602,7 @@
                     return [];
                 }
             } catch (error) {
+                console.warn('[MS Widgets] adv-nav-desktop: getSitePages failed', error);
                 return [];
             }
         }
@@ -818,69 +733,82 @@
 
         function buildCollectionHierarchy(collectionItems) {
             const hierarchy = {};
-            let urlPrefix = data.config['facilityUrlPrefix'] || 'storage-units';
-            urlPrefix = urlPrefix.replace(/^\/+|\/+$/g, '');
-            let statePrepend = data.config['statePrepend'] || '';
-            let cityPrepend = data.config['cityPrepend'] || '';
-            statePrepend = statePrepend.replace(/^\/+|\/+$/g, '');
-            cityPrepend = cityPrepend.replace(/^\/+|\/+$/g, '');
+            const urlPrefix = (data.config['facilityUrlPrefix'] || 'storage-units').replace(/^\/+|\/+$/g, '');
+            const statePrepend = (data.config['statePrepend'] || '').replace(/^\/+|\/+$/g, '');
+            const cityPrepend = (data.config['cityPrepend'] || '').replace(/^\/+|\/+$/g, '');
+
+            const ensureNode = (parentMap, key, name, url, isClickable) => {
+                if (!parentMap[key]) {
+                    parentMap[key] = {
+                        name, url, children: {},
+                        order: Object.keys(parentMap).length,
+                        isFolder: true,
+                        isClickable
+                    };
+                }
+                return parentMap[key];
+            };
+
+            const stateUrlFor = (name, clickable) => {
+                if (!clickable) return '#';
+                const slug = sanitizeUrlSegment(name);
+                return statePrepend ? `/${statePrepend}/${slug}` : `/${slug}`;
+            };
+
+            const cityUrlUnderState = (stateName, cityName, clickable) => {
+                if (!clickable) return '#';
+                const s = sanitizeUrlSegment(stateName);
+                const c = sanitizeUrlSegment(cityName);
+                if (cityPrepend) return `/${cityPrepend}/${s}/${c}`;
+                if (statePrepend) return `/${statePrepend}/${s}/${c}`;
+                return `/${s}/${c}`;
+            };
+
+            const cityUrlAlone = (name, clickable) => {
+                if (!clickable) return '#';
+                const slug = sanitizeUrlSegment(name);
+                return cityPrepend ? `/${cityPrepend}/${slug}` : `/${slug}`;
+            };
 
             collectionItems.forEach((item, index) => {
-                const itemData = item.data;
-                const facilityName = itemData['M.fac-name'] || itemData['facility-name'];
-                const facilityState = itemData['M.state'] || itemData['facility-state'];
-                const facilityCity = itemData['M.city'] || itemData['facility-city'];
-                const stateLink = itemData['M.state-link'] || itemData['state-link'] || '';
-                const cityLink = itemData['M.city-link'] || itemData['city-link'] || '';
+                const d = item.data;
+                const facilityName = d['M.fac-name'] || d['facility-name'];
+                const facilityState = d['M.state'] || d['facility-state'];
+                const facilityCity = d['M.city'] || d['facility-city'];
+                const isStateClickable = (d['M.state-link'] || d['state-link'] || '').toLowerCase() === 'yes';
+                const isCityClickable = (d['M.city-link'] || d['city-link'] || '').toLowerCase() === 'yes';
                 const pageItemUrl = item.page_item_url;
 
                 if (!facilityName || facilityName.trim() === '') return;
 
-                let facilityUrl = '#';
-                if (pageItemUrl) facilityUrl = `/${urlPrefix}/${pageItemUrl}`;
-
-                const isStateClickable = stateLink.toLowerCase() === 'yes';
-                const isCityClickable = cityLink.toLowerCase() === 'yes';
+                const facilityUrl = pageItemUrl ? `/${urlPrefix}/${pageItemUrl}` : '#';
                 const facilityKey = `${facilityName}-${index}`;
+                const hasState = facilityState && facilityState.trim() !== '';
+                const hasCity = facilityCity && facilityCity.trim() !== '';
 
-                if (facilityState && facilityState.trim() !== '' && facilityCity && facilityCity.trim() !== '') {
-                    if (!hierarchy[facilityState]) {
-                        const stateSlug = sanitizeUrlSegment(facilityState);
-                        let stateUrl = '#';
-                        if (isStateClickable) stateUrl = statePrepend ? `/${statePrepend}/${stateSlug}` : `/${stateSlug}`;
-                        hierarchy[facilityState] = { name: facilityState, url: stateUrl, children: {}, order: Object.keys(hierarchy).length, isFolder: true, isClickable: isStateClickable };
-                    }
-                    if (!hierarchy[facilityState].children[facilityCity]) {
-                        const stateSlug = sanitizeUrlSegment(facilityState);
-                        const citySlug = sanitizeUrlSegment(facilityCity);
-                        let cityUrl = '#';
-                        if (isCityClickable) {
-                            if (cityPrepend) cityUrl = `/${cityPrepend}/${stateSlug}/${citySlug}`;
-                            else if (statePrepend) cityUrl = `/${statePrepend}/${stateSlug}/${citySlug}`;
-                            else cityUrl = `/${stateSlug}/${citySlug}`;
-                        }
-                        hierarchy[facilityState].children[facilityCity] = { name: facilityCity, url: cityUrl, children: {}, order: Object.keys(hierarchy[facilityState].children).length, isFolder: true, isClickable: isCityClickable };
-                    }
-                    hierarchy[facilityState].children[facilityCity].children[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy[facilityState].children[facilityCity].children).length, isFolder: false, isClickable: true };
-                } else if (facilityState && facilityState.trim() !== '') {
-                    if (!hierarchy[facilityState]) {
-                        const stateSlug = sanitizeUrlSegment(facilityState);
-                        let stateUrl = '#';
-                        if (isStateClickable) stateUrl = statePrepend ? `/${statePrepend}/${stateSlug}` : `/${stateSlug}`;
-                        hierarchy[facilityState] = { name: facilityState, url: stateUrl, children: {}, order: Object.keys(hierarchy).length, isFolder: true, isClickable: isStateClickable };
-                    }
-                    hierarchy[facilityState].children[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy[facilityState].children).length, isFolder: false, isClickable: true };
-                } else if (facilityCity && facilityCity.trim() !== '' && (!facilityState || facilityState.trim() === '')) {
-                    if (!hierarchy[facilityCity]) {
-                        const citySlug = sanitizeUrlSegment(facilityCity);
-                        let cityUrl = '#';
-                        if (isCityClickable) cityUrl = cityPrepend ? `/${cityPrepend}/${citySlug}` : `/${citySlug}`;
-                        hierarchy[facilityCity] = { name: facilityCity, url: cityUrl, children: {}, order: Object.keys(hierarchy).length, isFolder: true, isClickable: isCityClickable };
-                    }
-                    hierarchy[facilityCity].children[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy[facilityCity].children).length, isFolder: false, isClickable: true };
+                let targetMap;
+                if (hasState && hasCity) {
+                    const stateNode = ensureNode(hierarchy, facilityState, facilityState, stateUrlFor(facilityState, isStateClickable), isStateClickable);
+                    const cityNode = ensureNode(stateNode.children, facilityCity, facilityCity, cityUrlUnderState(facilityState, facilityCity, isCityClickable), isCityClickable);
+                    targetMap = cityNode.children;
+                } else if (hasState) {
+                    const stateNode = ensureNode(hierarchy, facilityState, facilityState, stateUrlFor(facilityState, isStateClickable), isStateClickable);
+                    targetMap = stateNode.children;
+                } else if (hasCity) {
+                    const cityNode = ensureNode(hierarchy, facilityCity, facilityCity, cityUrlAlone(facilityCity, isCityClickable), isCityClickable);
+                    targetMap = cityNode.children;
                 } else {
-                    hierarchy[facilityKey] = { name: facilityName, url: facilityUrl, children: [], order: Object.keys(hierarchy).length, isFolder: false, isClickable: true };
+                    targetMap = hierarchy;
                 }
+
+                targetMap[facilityKey] = {
+                    name: facilityName,
+                    url: facilityUrl,
+                    children: [],
+                    order: Object.keys(targetMap).length,
+                    isFolder: false,
+                    isClickable: true
+                };
             });
             return convertHierarchyToArray(hierarchy);
         }
@@ -955,7 +883,7 @@
                         setTimeout(() => {
                             dropdown.style.display = 'none';
                             li.classList.remove('dropdown-open');
-                            if (dropdown._positionUpdater) { clearInterval(dropdown._positionUpdater); delete dropdown._positionUpdater; }
+                            if (dropdown._positionCleanup) { dropdown._positionCleanup(); delete dropdown._positionCleanup; }
                         }, 200);
                     }
                 });
@@ -986,7 +914,6 @@
         }
 
         function positionDropdown(dropdown, parentItem) {
-            const viewportHeight = window.innerHeight;
             const parentRect = parentItem.getBoundingClientRect();
             const isMainNavDropdown = parentItem.classList.contains('nav-main-item');
 
@@ -995,7 +922,7 @@
             if (isMainNavDropdown) {
                 dropdown.style.position = 'absolute';
                 dropdown.style.top = '100%';
-                const availableHeight = viewportHeight - parentRect.bottom;
+                const availableHeight = window.innerHeight - parentRect.bottom;
                 const scrollInner = dropdown.querySelector('.nav-dropdown-scroll-inner');
                 if (scrollInner) scrollInner.style.maxHeight = Math.min(400, availableHeight - 20) + 'px';
 
@@ -1004,6 +931,9 @@
                 if (dropdownRight > window.innerWidth - 20) { dropdown.style.right = '0px'; dropdown.style.left = 'auto'; }
                 else { dropdown.style.left = '0px'; dropdown.style.right = 'auto'; }
             } else {
+                // Nested dropdown uses position:fixed to escape ancestor overflow clipping.
+                // We must reposition when the page scrolls or the viewport resizes — both
+                // change parentItem's screen-relative rect while the dropdown is open.
                 dropdown.style.position = 'fixed';
                 dropdown.style.zIndex = '10000';
 
@@ -1015,19 +945,31 @@
                     const currentRect = parentItem.getBoundingClientRect();
                     dropdown.style.top = currentRect.top + 'px';
                     dropdown.style.left = (currentRect.right + offset) + 'px';
-                    const availableHeight = viewportHeight - currentRect.top - 20;
+                    const availableHeight = window.innerHeight - currentRect.top - 20;
                     const scrollInner = dropdown.querySelector('.nav-dropdown-scroll-inner');
                     if (scrollInner) scrollInner.style.maxHeight = Math.min(400, availableHeight) + 'px';
                 };
 
                 updatePosition();
-                if (dropdown._positionUpdater) clearInterval(dropdown._positionUpdater);
-                dropdown._positionUpdater = setInterval(updatePosition, 16);
-            }
-        }
 
-        function renderFallbackNavigation() {
-            console.error('[MS Widgets] Rendering fallback navigation');
+                if (dropdown._positionCleanup) dropdown._positionCleanup();
+
+                let rafPending = false;
+                const onScrollOrResize = () => {
+                    if (rafPending) return;
+                    rafPending = true;
+                    requestAnimationFrame(() => {
+                        rafPending = false;
+                        updatePosition();
+                    });
+                };
+                window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
+                window.addEventListener('resize', onScrollOrResize, { passive: true });
+                dropdown._positionCleanup = () => {
+                    window.removeEventListener('scroll', onScrollOrResize, { capture: true });
+                    window.removeEventListener('resize', onScrollOrResize);
+                };
+            }
         }
 
     }
