@@ -119,7 +119,7 @@
 .ms-nav-desktop .nav-dropdown {
   position: absolute;
   min-width: 200px;
-  max-width: 320px;
+  max-width: 500px;
   width: max-content;
   background: var(--dropdown-bg-color, #ffffff);
   border: var(--dropdown-border-width, 0px) solid var(--dropdown-border-color, transparent);
